@@ -85,4 +85,11 @@
     <string name="backup_saved">Backup saved</string>
     <string name="backup_restored">Backup restored</string>
     <string name="backup_failed">Backup failed</string>
+    <string name="status_online">online</string>
+    <string name="status_offline">offline</string>
+    <string name="clock_day_left">%1$s h %2$s m left today</string>
+    <string name="latency_up">UP</string>
+    <string name="latency_waiting">waiting…</string>
+    <string name="notes_more">…and %1$s more</string>
+    <string name="reading_none">No reader yet</string>
 </resources>

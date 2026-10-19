@@ -33,6 +33,7 @@ class HomeActivity : BaseActivity() {
     private lateinit var layout: DashboardLayout
     private lateinit var grid: DashboardGrid
     private lateinit var pageLabel: TextView
+    private lateinit var status: TextView
     private lateinit var normalBar: LinearLayout
     private lateinit var editBar: LinearLayout
     private var pageIndex = 0
@@ -64,6 +65,7 @@ class HomeActivity : BaseActivity() {
     private val tick = object : Runnable {
         override fun run() {
             grid.refreshWidgets()
+            updateStatus()
             Eink.fullRefresh(window.decorView)
             val now = System.currentTimeMillis()
             val delay = minOf(60_000 - now % 60_000, grid.nextDelayMs(now)).coerceAtLeast(250)
@@ -85,18 +87,29 @@ class HomeActivity : BaseActivity() {
         grid = DashboardGrid(this).apply {
             onLongPress = { if (!editing) setEditing(true) }
             onCellTap = ::onCellTap
+            onSwipe = { flip(it) }
         }
-        pageLabel = Ui.text(this, 16f, Ui.bold).apply { gravity = Gravity.CENTER }
+        pageLabel = Ui.text(this, 18f, Ui.bold).apply {
+            gravity = Gravity.CENTER
+            setOnClickListener { flip(if (pageIndex == this@HomeActivity.layout.pages.size - 1) -pageIndex else 1) }
+        }
+        status = Ui.text(this, 13f).apply { gravity = Gravity.CENTER_VERTICAL or Gravity.END }
 
-        normalBar = bar(
-            button(R.string.prev) { flip(-1) },
-            button(R.string.apps) {
-                startActivity(Intent(this, AppDrawerActivity::class.java))
+        // Slim footer: apps on the start side, page dots in the middle, device status on the end side.
+        val apps = Ui.text(this, 15f, Ui.bold).apply {
+            text = getString(R.string.apps).uppercase(resources.configuration.locale) + "  ▦"
+            gravity = Gravity.CENTER_VERTICAL
+            setOnClickListener {
+                startActivity(Intent(this@HomeActivity, AppDrawerActivity::class.java))
                 overridePendingTransition(0, 0)
-            },
-            pageLabel,
-            button(R.string.next) { flip(1) },
-        )
+            }
+        }
+        normalBar = LinearLayout(this).apply {
+            val h = Ui.dp(context, 48f)
+            addView(apps, LinearLayout.LayoutParams(0, h, 1f))
+            addView(pageLabel, LinearLayout.LayoutParams(0, h, 1f))
+            addView(status, LinearLayout.LayoutParams(0, h, 1f))
+        }
         editBar = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             addView(bar(
@@ -154,6 +167,18 @@ class HomeActivity : BaseActivity() {
         handler.removeCallbacks(dimNow)
     }
 
+    private fun updateStatus() {
+        val b = registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val level = b?.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1) ?: -1
+        val scale = b?.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, 100) ?: 100
+        @Suppress("DEPRECATION")
+        val net = (getSystemService(CONNECTIVITY_SERVICE) as android.net.ConnectivityManager).activeNetworkInfo
+        @Suppress("DEPRECATION")
+        val online = net?.isConnected == true
+        val pct = if (level >= 0) com.arashrasoulzadeh.einkdash.util.Fa.digits(this, "${level * 100 / scale}%") else ""
+        status.text = pct + "   " + (if (online) "◉ " else "○ ") + getString(if (online) R.string.status_online else R.string.status_offline)
+    }
+
     private fun setupSelected() {
         val sel = selected ?: return toast(R.string.select_first)
         if (WidgetRegistry.get(sel.type)?.configure(this) != true) toast(R.string.nothing_to_setup)
@@ -171,7 +196,7 @@ class HomeActivity : BaseActivity() {
 
     private fun showPage() {
         grid.page = page
-        pageLabel.text = com.arashrasoulzadeh.einkdash.util.Fa.digits(this, "${pageIndex + 1}/${layout.pages.size}")
+        pageLabel.text = (0 until layout.pages.size).joinToString(" ") { if (it == pageIndex) "●" else "○" }
         refresh()
     }
 

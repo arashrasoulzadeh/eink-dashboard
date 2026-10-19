@@ -27,6 +27,8 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
 
     var onLongPress: (() -> Unit)? = null
     var onCellTap: ((col: Int, row: Int) -> Unit)? = null
+    /** +1 = next page, -1 = previous (already mirrored for RTL). */
+    var onSwipe: ((Int) -> Unit)? = null
 
     private val density = resources.displayMetrics.density
     private val thin = Paint().apply { color = 0xFF000000.toInt(); strokeWidth = 1f * density; style = Paint.Style.STROKE }
@@ -39,6 +41,15 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
             longPressed = true
             onLongPress?.invoke()
         }
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
+            if (editMode || e1 == null) return false
+            val dx = e2.x - e1.x
+            if (kotlin.math.abs(dx) < width / 5f || kotlin.math.abs(dx) < kotlin.math.abs(e2.y - e1.y)) return false
+            val forward = if (isRtl()) dx > 0 else dx < 0
+            onSwipe?.invoke(if (forward) 1 else -1)
+            return true
+        }
+
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             if (!editMode) return false
             val p = page ?: return false

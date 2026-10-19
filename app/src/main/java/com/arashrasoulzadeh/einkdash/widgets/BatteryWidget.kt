@@ -6,6 +6,8 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.BatteryManager
 import com.arashrasoulzadeh.einkdash.R
+import com.arashrasoulzadeh.einkdash.util.FitText
+import com.arashrasoulzadeh.einkdash.util.Ui
 
 class BatteryWidget : DashboardWidget {
     override val type = "battery"
@@ -14,7 +16,7 @@ class BatteryWidget : DashboardWidget {
     override val defaultH = 1
 
     override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
-        val battery = figure()
+        val battery = fill(FitText(context, Ui.light, 64f))
         val wifi = line(14f)
 
         override fun refresh() {

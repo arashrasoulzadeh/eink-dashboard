@@ -3,8 +3,13 @@ package com.arashrasoulzadeh.einkdash.widgets
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.view.Gravity
+import android.widget.LinearLayout
+import android.widget.TextView
 import com.arashrasoulzadeh.einkdash.R
 import com.arashrasoulzadeh.einkdash.util.Bg
+import com.arashrasoulzadeh.einkdash.util.FitText
+import com.arashrasoulzadeh.einkdash.util.Ui
 import com.arashrasoulzadeh.einkdash.weather.WeatherCodes
 import com.arashrasoulzadeh.einkdash.weather.WeatherSettingsActivity
 import com.arashrasoulzadeh.einkdash.weather.WeatherStore
@@ -13,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.roundToInt
 
+/** Big current temperature with condition and range beside it, then three day columns. */
 class WeatherWidget : DashboardWidget {
     override val type = "weather"
     override val titleRes = R.string.widget_weather
@@ -21,19 +27,33 @@ class WeatherWidget : DashboardWidget {
 
     override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
         val store = WeatherStore(context)
-        val now = figure(40f)
-        val place = line(13f)
-        val days = line(14f).apply { setLineSpacing(0f, 1.3f); setPadding(0, (10 * dp).toInt(), 0, 0) }
+        val temp = FitText(context, Ui.light).apply { gravity = Gravity.CENTER_VERTICAL }
+        val cond = Ui.text(context, 14f, Ui.bold).apply { maxLines = 2 }
+        val range = Ui.text(context, 13f).apply { setSingleLine() }
+        val days = LinearLayout(context)
         var fetching = false
 
-        init { setOnClickListener { open(context) } }
+        init {
+            setOnClickListener { open(context) }
+            fill(LinearLayout(context).apply {
+                addView(temp, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f))
+                addView(LinearLayout(context).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    setPadding((8 * dp).toInt(), 0, 0, 0)
+                    addView(cond); addView(range)
+                }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f))
+            }, 1.3f)
+            addView(Ui.rule(context))
+            fill(days, 1f)
+        }
 
         override fun refresh() {
+            label(R.string.widget_weather, store.placeName?.substringBefore(","))
             if (!store.hasLocation) {
-                place.show(null); now.show(null); days.show(context.getString(R.string.weather_tap_setup))
+                temp.text = "—°"; cond.setText(R.string.weather_tap_setup); range.text = ""; days.removeAllViews()
                 return
             }
-            place.show(store.placeName)
             render(store.cache)
             if (!fetching && store.isStale(System.currentTimeMillis())) {
                 fetching = true
@@ -43,20 +63,34 @@ class WeatherWidget : DashboardWidget {
 
         private fun render(json: String?) {
             val o = json?.let { runCatching { JSONObject(it) }.getOrNull() }
-            if (o == null) { now.text = "…"; days.text = ""; return }
+            if (o == null) { temp.text = "…"; cond.text = ""; range.text = ""; return }
             val cur = o.getJSONObject("current")
-            now.text = num("${cur.getDouble("temperature_2m").roundToInt()}°") + "  " +
-                context.getString(WeatherCodes.label(cur.getInt("weather_code")))
             val d = o.getJSONObject("daily")
+            temp.text = num("${cur.getDouble("temperature_2m").roundToInt()}°")
+            cond.setText(WeatherCodes.label(cur.getInt("weather_code")))
+            val hi = d.getJSONArray("temperature_2m_max"); val lo = d.getJSONArray("temperature_2m_min")
+            range.text = num("${hi.getDouble(0).roundToInt()}° / ${lo.getDouble(0).roundToInt()}°")
+
             val locale = context.resources.configuration.locale
             val parse = SimpleDateFormat("yyyy-MM-dd", Locale.US)
             val dayName = SimpleDateFormat("EEE", locale)
             val times = d.getJSONArray("time")
-            days.text = (0 until times.length()).joinToString("\n") { i ->
+            days.removeAllViews()
+            for (i in 0 until times.length()) {
                 val name = runCatching { dayName.format(parse.parse(times.getString(i))!!) }.getOrDefault("")
-                val hi = d.getJSONArray("temperature_2m_max").getDouble(i).roundToInt()
-                val lo = d.getJSONArray("temperature_2m_min").getDouble(i).roundToInt()
-                "$name  " + num("$hi° / $lo°") + "  " + context.getString(WeatherCodes.label(d.getJSONArray("weather_code").getInt(i)))
+                days.addView(LinearLayout(context).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = Gravity.CENTER
+                    addView(Ui.text(context, 12f, Ui.bold).apply { text = name.uppercase(locale) })
+                    addView(Ui.text(context, 14f).apply {
+                        text = num("${hi.getDouble(i).roundToInt()}° ${lo.getDouble(i).roundToInt()}°")
+                    })
+                    addView(Ui.text(context, 11f).apply {
+                        setText(WeatherCodes.label(d.getJSONArray("weather_code").getInt(i)))
+                        setSingleLine(); ellipsize = android.text.TextUtils.TruncateAt.END
+                        gravity = Gravity.CENTER
+                    })
+                }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f))
             }
         }
     }

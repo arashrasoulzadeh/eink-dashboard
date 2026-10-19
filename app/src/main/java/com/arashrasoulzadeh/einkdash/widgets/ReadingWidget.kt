@@ -5,6 +5,8 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import com.arashrasoulzadeh.einkdash.R
+import com.arashrasoulzadeh.einkdash.util.FitText
+import com.arashrasoulzadeh.einkdash.util.Ui
 
 /**
  * Opens the user's reader app (Fidibo by default). Reader apps don't expose the
@@ -13,7 +15,7 @@ import com.arashrasoulzadeh.einkdash.R
 class ReadingWidget : DashboardWidget {
     override val type = "reading"
     override val titleRes = R.string.widget_reading
-    override val defaultW = 2
+    override val defaultW = 4
     override val defaultH = 2
 
     private fun prefs(ctx: Context) = ctx.applicationContext.getSharedPreferences("reading", Context.MODE_PRIVATE)
@@ -35,8 +37,8 @@ class ReadingWidget : DashboardWidget {
     }
 
     override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
-        val app = figure(26f)
-        val hint = line(13f)
+        val app = fill(FitText(context, Ui.light, 40f).apply { gravity = android.view.Gravity.CENTER_VERTICAL })
+        val hint = line(14f, Ui.bold)
 
         init {
             setOnClickListener {
@@ -50,12 +52,12 @@ class ReadingWidget : DashboardWidget {
         override fun refresh() {
             val pkg = readerPackage(context)
             if (pkg == null) {
-                app.show(null)
+                app.show(context.getString(R.string.reading_none))
                 hint.setText(R.string.reading_pick)
             } else {
                 val pm = context.packageManager
                 app.show(runCatching { pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)) }.getOrDefault(pkg))
-                hint.setText(R.string.reading_tap)
+                hint.text = context.getString(R.string.reading_tap) + "  →"
             }
         }
     }

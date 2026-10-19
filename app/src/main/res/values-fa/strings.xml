@@ -82,4 +82,11 @@
     <string name="backup_saved">پشتیبان ذخیره شد</string>
     <string name="backup_restored">پشتیبان بازگردانی شد</string>
     <string name="backup_failed">پشتیبان‌گیری ناموفق بود</string>
+    <string name="status_online">آنلاین</string>
+    <string name="status_offline">آفلاین</string>
+    <string name="clock_day_left">%1$s ساعت و %2$s دقیقه تا پایان روز</string>
+    <string name="latency_up">برقرار</string>
+    <string name="latency_waiting">در انتظار…</string>
+    <string name="notes_more">…و %1$s مورد دیگر</string>
+    <string name="reading_none">کتاب‌خوانی انتخاب نشده</string>
 </resources>

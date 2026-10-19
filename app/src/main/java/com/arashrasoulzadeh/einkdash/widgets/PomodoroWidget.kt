@@ -6,17 +6,18 @@ import android.content.Context
 import com.arashrasoulzadeh.einkdash.R
 import com.arashrasoulzadeh.einkdash.eink.Eink
 import com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro
+import com.arashrasoulzadeh.einkdash.util.Ring
 
-/** Tap to start a focus session, tap again to stop. Per-second display only in the last minute. */
+/** Progress ring with the time left inside. Tap to start or stop; per-second only in the last minute. */
 class PomodoroWidget : DashboardWidget {
     override val type = "pomodoro"
     override val titleRes = R.string.widget_pomodoro
     override val defaultW = 2
-    override val defaultH = 1
+    override val defaultH = 2
 
     override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
-        val body = figure()
-        val hint = line(13f)
+        val ring = fill(Ring(context))
+        val hint = line(12f, center = true)
 
         init {
             setOnClickListener {
@@ -29,25 +30,27 @@ class PomodoroWidget : DashboardWidget {
             Pomodoro.checkFinished(context)
             val end = Pomodoro.endAt(context)
             if (end == 0L) {
-                body.text = num("${Pomodoro.workMin(context)}:00")
+                label(R.string.widget_pomodoro)
+                ring.progress = 0f
+                ring.label = num("${Pomodoro.workMin(context)}:00")
                 hint.setText(R.string.pomo_tap_start)
                 return
             }
+            val isBreak = Pomodoro.phase(context) == Pomodoro.BREAK
+            val total = (if (isBreak) Pomodoro.breakMin(context) else Pomodoro.workMin(context)) * 60_000L
             val left = maxOf(0L, end - System.currentTimeMillis())
-            val label = context.getString(if (Pomodoro.phase(context) == Pomodoro.BREAK) R.string.pomo_break else R.string.pomo_focus)
-            body.text = if (left <= 60_000) num("0:%02d".format((left + 999) / 1000))
-            else num("${(left + 59_999) / 60_000} min")
-            hint.text = label + " · " + context.getString(R.string.pomo_tap_stop)
+            label(R.string.widget_pomodoro, context.getString(if (isBreak) R.string.pomo_break else R.string.pomo_focus))
+            ring.progress = 1f - left.toFloat() / total
+            ring.label = if (left <= 60_000) num("0:%02d".format((left + 999) / 1000))
+            else num("${(left + 59_999) / 60_000}′")
+            hint.setText(R.string.pomo_tap_stop)
         }
 
         override fun nextDelayMs(now: Long): Long {
             val end = Pomodoro.endAt(context)
             if (end == 0L) return Long.MAX_VALUE
             val left = end - now
-            return when {
-                left <= 61_000 -> 1000L
-                else -> (left - 60_000) % 60_000 + 1
-            }
+            return if (left <= 61_000) 1000L else (left - 60_000) % 60_000 + 1
         }
     }
 
