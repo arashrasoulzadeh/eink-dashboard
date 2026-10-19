@@ -45,6 +45,8 @@ class AppDrawerActivity : Activity() {
         setContentView(LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(16, 16, 16, 16)
+            // Keeps bars clear of system bars on edge-to-edge Android 15+.
+            fitsSystemWindows = true
             addView(grid, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
             addView(nav)
         })

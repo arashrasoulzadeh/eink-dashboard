@@ -3,5 +3,24 @@
     <string name="apps">Apps</string>
     <string name="prev">‹</string>
     <string name="next">›</string>
-    <string name="dashboard_placeholder">Dashboard</string>
+    <string name="widget_clock">Clock</string>
+    <string name="widget_weather">Weather</string>
+    <string name="widget_battery">Battery &amp; Wi-Fi</string>
+    <string name="widget_latency">API latency</string>
+    <string name="widget_reading">Continue reading</string>
+    <string name="widget_notes">Notes</string>
+    <string name="widget_pomodoro">Pomodoro</string>
+    <string name="edit_add">Add</string>
+    <string name="edit_remove">Remove</string>
+    <string name="edit_wider">W+</string>
+    <string name="edit_narrower">W−</string>
+    <string name="edit_taller">H+</string>
+    <string name="edit_shorter">H−</string>
+    <string name="edit_page">Page</string>
+    <string name="edit_done">Done</string>
+    <string name="page_add">Add page</string>
+    <string name="page_delete">Delete this page</string>
+    <string name="no_space">No space there</string>
+    <string name="select_first">Tap a widget first</string>
+    <string name="last_page">Can\'t delete the last page</string>
 </resources>

@@ -1,5 +1,24 @@
 <resources>
     <string name="app_name">داشبورد</string>
     <string name="apps">برنامه‌ها</string>
-    <string name="dashboard_placeholder">داشبورد</string>
+    <string name="widget_clock">ساعت</string>
+    <string name="widget_weather">آب‌وهوا</string>
+    <string name="widget_battery">باتری و وای‌فای</string>
+    <string name="widget_latency">تأخیر API</string>
+    <string name="widget_reading">ادامهٔ مطالعه</string>
+    <string name="widget_notes">یادداشت‌ها</string>
+    <string name="widget_pomodoro">پومودورو</string>
+    <string name="edit_add">افزودن</string>
+    <string name="edit_remove">حذف</string>
+    <string name="edit_wider">پهن‌تر</string>
+    <string name="edit_narrower">باریک‌تر</string>
+    <string name="edit_taller">بلندتر</string>
+    <string name="edit_shorter">کوتاه‌تر</string>
+    <string name="edit_page">صفحه</string>
+    <string name="edit_done">تمام</string>
+    <string name="page_add">افزودن صفحه</string>
+    <string name="page_delete">حذف این صفحه</string>
+    <string name="no_space">جای خالی نیست</string>
+    <string name="select_first">اول یک ویجت را لمس کنید</string>
+    <string name="last_page">آخرین صفحه را نمی‌توان حذف کرد</string>
 </resources>

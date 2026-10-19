@@ -54,7 +54,11 @@ A single scheduler ticks the widgets and batches all their view updates into one
   - [ ] CI (GitHub Actions) that builds a debug APK
   - [ ] Test on a Fidibook (Android 4.2–4.4) and a Boox; confirm the Onyx `ViewUpdateHelper` reflection call
   - [ ] Bundle the Vazirmatn font
-- [ ] 1. Grid engine (4x6 portrait / 6x4 landscape) + edit mode (long-press, then tap to move) + JSON persistence
+- [x] 1. Grid engine (4x6 portrait / 6x4 landscape) + edit mode (long-press, then tap to move) + JSON persistence
+  - Edit bar: Add, Remove, W±/H± resize, Page (add/delete), Done; Back also exits edit mode
+  - Widgets are placeholders behind `DashboardWidget` / `WidgetRegistry` until phases 2–4
+  - Verified on an API 36 emulator (render, select, remove, move, persist across restart); layout logic covered by JUnit tests
+  - [ ] Verify on Android 4.2 (Fidibook), landscape layout and RTL column mirroring
 - [ ] 2. Clock (Jalali/Gregorian), battery/Wi-Fi, notes checklist
 - [ ] 3. Weather (Open-Meteo, network location + city fallback), API latency (OkHttp 3.12 + Conscrypt)
 - [ ] 4. Pomodoro (full-screen inverted alert), continue reading (Fidibo first)
