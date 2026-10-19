@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Eink Dash</string>
+    <string name="apps">Apps</string>
+    <string name="prev">‹</string>
+    <string name="next">›</string>
+    <string name="dashboard_placeholder">Dashboard</string>
+</resources>

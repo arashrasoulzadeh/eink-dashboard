@@ -1,0 +1,10 @@
+<resources>
+    <!-- Pure white/black, no animations, no status bar: avoids e-ink ghosting. -->
+    <style name="Theme.EinkDash" parent="android:Theme.Holo.Light.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>
