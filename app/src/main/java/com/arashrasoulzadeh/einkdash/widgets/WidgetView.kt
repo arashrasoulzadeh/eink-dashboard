@@ -19,18 +19,18 @@ abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(contex
 
     init {
         orientation = VERTICAL
-        val pad = (14 * dp).toInt()
+        val pad = (12 * dp).toInt()
         setPadding(pad, pad, pad, pad)
         if (titleRes != 0) {
             addView(Ui.label(context, titleRes))
-            addView(Ui.gap(context, 6f))
+            addView(Ui.gap(context, 4f))
         }
     }
 
     /** Big light figure: temperatures, percentages, timers. */
     protected fun figure(sizeSp: Float = 34f, center: Boolean = false) = line(sizeSp, Ui.light, center)
 
-    protected fun line(sizeSp: Float, face: Typeface = Typeface.DEFAULT, center: Boolean = false): TextView =
+    protected fun line(sizeSp: Float, face: Typeface = Ui.regular, center: Boolean = false): TextView =
         Ui.text(context, sizeSp, face).apply {
             if (center) gravity = Gravity.CENTER_HORIZONTAL
         }.also { addView(it) }

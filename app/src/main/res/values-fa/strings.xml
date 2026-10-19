@@ -14,7 +14,7 @@
     <string name="edit_narrower">باریک‌تر</string>
     <string name="edit_taller">بلندتر</string>
     <string name="edit_shorter">کوتاه‌تر</string>
-    <string name="edit_page">صفحه</string>
+    <string name="edit_page">بیشتر</string>
     <string name="edit_done">تمام</string>
     <string name="page_add">افزودن صفحه</string>
     <string name="page_delete">حذف این صفحه</string>
@@ -66,4 +66,20 @@
     <string name="reading_pick">برنامهٔ کتاب‌خوان را انتخاب کنید</string>
     <string name="reading_tap">برای ادامه لمس کنید</string>
     <string name="back">بازگشت</string>
+    <string name="settings">تنظیمات</string>
+    <string name="settings_language">زبان</string>
+    <string name="lang_system">سیستم</string>
+    <string name="settings_display">نمایش</string>
+    <string name="keep_screen_on">روشن ماندن صفحه: %1$s</string>
+    <string name="on">روشن</string>
+    <string name="off">خاموش</string>
+    <string name="dim_never">نور صفحه: همیشه روشن</string>
+    <string name="dim_after">خاموشی نور پس از %1$d دقیقه بی‌کاری</string>
+    <string name="settings_backup">پشتیبان</string>
+    <string name="backup_export">خروجی</string>
+    <string name="backup_import">ورودی</string>
+    <string name="backup_help">چیدمان، تنظیمات ویجت‌ها و یادداشت‌ها در یک فایل JSON ذخیره می‌شود. در اندروید ۴٫۲ و ۴٫۳ فایل در Downloads/einkdash-backup.json است.</string>
+    <string name="backup_saved">پشتیبان ذخیره شد</string>
+    <string name="backup_restored">پشتیبان بازگردانی شد</string>
+    <string name="backup_failed">پشتیبان‌گیری ناموفق بود</string>
 </resources>

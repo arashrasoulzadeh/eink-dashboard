@@ -51,9 +51,7 @@ A single scheduler ticks the widgets and batches all their view updates into one
 
 ## Phases / TODO
 - [x] 0. Project skeleton (AGP 8.11.1, Gradle 8.14, minSdk 17, no AndroidX), HOME launcher, paged app drawer, e-ink refresh helper
-  - [ ] CI (GitHub Actions) that builds a debug APK
   - [ ] Test on a Fidibook (Android 4.2–4.4) and a Boox; confirm the Onyx `ViewUpdateHelper` reflection call
-  - [ ] Bundle the Vazirmatn font
 - [x] 1. Grid engine (4x6 portrait / 6x4 landscape) + edit mode (long-press, then tap to move) + JSON persistence
   - Edit bar: Add, Remove, W±/H± resize, Page (add/delete), Done; Back also exits edit mode
   - Widgets are placeholders behind `DashboardWidget` / `WidgetRegistry` until phases 2–4
@@ -68,7 +66,10 @@ A single scheduler ticks the widgets and batches all their view updates into one
   - [ ] Let a pomodoro run out to check the alert screen; confirm Fidibo's package name on the device
 - [x] UI pass: "paper" look (rules instead of boxes, light figures, uppercase section labels), flat outlined buttons, shared `Ui` kit and screen header
 - [x] Edit bar has Setup: opens the selected widget's settings
-- [ ] 5. E-ink polish, always-on idle mode, Persian/RTL QA, JSON export/import, GitHub release
+- [x] 5. Vazirmatn font (all text), in-app language switch (System/English/فارسی), always-on + frontlight off after idle (default 2 min), JSON backup export/import (system picker on 4.4+, Downloads file on 4.2/4.3), GitHub Actions build + tag releases, README
+  - Verified on the API 36 emulator: Persian/RTL dashboard, edit mode and settings; backup export → import round trip
+  - [ ] Push to GitHub to run CI for the first time; the release APK is debug-signed
+  - [ ] Check frontlight dimming on real e-ink hardware (window brightness 0 may behave differently per device)
 
 Build note: `~/.gradle/gradle.properties` routes Gradle through a proxy at 127.0.0.1:10808. When that proxy is down, build with `--offline`.
 

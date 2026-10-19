@@ -1,6 +1,7 @@
 package com.arashrasoulzadeh.einkdash.latency
 
 import android.app.Activity
+import com.arashrasoulzadeh.einkdash.util.BaseActivity
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
@@ -12,7 +13,7 @@ import com.arashrasoulzadeh.einkdash.R
 import com.arashrasoulzadeh.einkdash.util.Ui
 
 /** One URL per line. */
-class LatencySettingsActivity : Activity() {
+class LatencySettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val store = LatencyStore(this)

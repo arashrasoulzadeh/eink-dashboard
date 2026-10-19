@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Test, lint and build
+        run: ./gradlew --no-configuration-cache testDebugUnitTest lintDebug assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: einkdash-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+      # Sideload-only app: tagged builds attach the APK to a GitHub release.
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk "einkdash-${GITHUB_REF_NAME}.apk"
+          gh release create "$GITHUB_REF_NAME" "einkdash-${GITHUB_REF_NAME}.apk" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

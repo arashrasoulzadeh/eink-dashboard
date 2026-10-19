@@ -22,8 +22,21 @@ object Ui {
     const val INK = 0xFF000000.toInt()
     const val PAPER = 0xFFFFFFFF.toInt()
 
-    val light: Typeface = Typeface.create("sans-serif-light", Typeface.NORMAL)
-    val bold: Typeface = Typeface.create("sans-serif", Typeface.BOLD)
+    // Vazirmatn everywhere: Android 4.x's built-in Persian rendering is poor, and it covers Latin too.
+    var regular: Typeface = Typeface.DEFAULT
+        private set
+    var light: Typeface = Typeface.DEFAULT
+        private set
+    var bold: Typeface = Typeface.DEFAULT_BOLD
+        private set
+
+    fun init(ctx: Context) {
+        fun load(name: String, fallback: Typeface) =
+            runCatching { Typeface.createFromAsset(ctx.assets, "fonts/Vazirmatn-$name.ttf") }.getOrDefault(fallback)
+        regular = load("Regular", Typeface.DEFAULT)
+        light = load("Light", Typeface.create("sans-serif-light", Typeface.NORMAL))
+        bold = load("Bold", Typeface.DEFAULT_BOLD)
+    }
 
     fun dp(ctx: Context, v: Float) = (v * ctx.resources.displayMetrics.density).toInt()
 
@@ -55,6 +68,7 @@ object Ui {
     fun input(ctx: Context, hintRes: Int) = EditText(ctx).apply {
         setHint(hintRes)
         textSize = 18f
+        typeface = regular
         setTextColor(INK)
         setHintTextColor(INK and 0x00FFFFFF or 0x88000000.toInt())
         background = box(ctx, PAPER)
@@ -63,9 +77,11 @@ object Ui {
         minHeight = dp(ctx, 52f)
     }
 
-    fun text(ctx: Context, sizeSp: Float, face: Typeface = Typeface.DEFAULT) = TextView(ctx).apply {
+    fun text(ctx: Context, sizeSp: Float, face: Typeface = regular) = TextView(ctx).apply {
         textSize = sizeSp
         typeface = face
+        // Vazirmatn's tall ascent/descent would clip the last line in one-row widgets.
+        includeFontPadding = false
         setTextColor(INK)
     }
 

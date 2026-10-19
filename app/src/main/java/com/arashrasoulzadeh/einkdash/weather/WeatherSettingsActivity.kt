@@ -2,6 +2,7 @@ package com.arashrasoulzadeh.einkdash.weather
 
 import android.Manifest
 import android.app.Activity
+import com.arashrasoulzadeh.einkdash.util.BaseActivity
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -16,7 +17,7 @@ import com.arashrasoulzadeh.einkdash.util.Bg
 import com.arashrasoulzadeh.einkdash.util.Ui
 
 /** Pick device location (network-based) or search a city. */
-class WeatherSettingsActivity : Activity() {
+class WeatherSettingsActivity : BaseActivity() {
 
     private lateinit var store: WeatherStore
     private lateinit var results: LinearLayout

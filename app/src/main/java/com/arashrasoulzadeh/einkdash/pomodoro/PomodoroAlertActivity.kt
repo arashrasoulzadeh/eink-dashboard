@@ -1,6 +1,7 @@
 package com.arashrasoulzadeh.einkdash.pomodoro
 
 import android.app.Activity
+import com.arashrasoulzadeh.einkdash.util.BaseActivity
 import android.content.Context
 import android.media.RingtoneManager
 import android.os.Bundle
@@ -14,7 +15,7 @@ import com.arashrasoulzadeh.einkdash.R
 import com.arashrasoulzadeh.einkdash.util.Ui
 
 /** Full-screen inverted notice: works on e-readers with no speaker or vibration motor. */
-class PomodoroAlertActivity : Activity() {
+class PomodoroAlertActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         @Suppress("DEPRECATION")
@@ -47,10 +48,5 @@ class PomodoroAlertActivity : Activity() {
         runCatching {
             RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))?.play()
         }
-    }
-
-    override fun finish() {
-        super.finish()
-        overridePendingTransition(0, 0)
     }
 }

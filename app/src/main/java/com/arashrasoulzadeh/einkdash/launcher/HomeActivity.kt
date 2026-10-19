@@ -1,6 +1,7 @@
 package com.arashrasoulzadeh.einkdash.launcher
 
 import android.app.Activity
+import com.arashrasoulzadeh.einkdash.util.BaseActivity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
@@ -21,9 +22,12 @@ import com.arashrasoulzadeh.einkdash.dashboard.LayoutStore
 import com.arashrasoulzadeh.einkdash.dashboard.Placement
 import com.arashrasoulzadeh.einkdash.eink.Eink
 import com.arashrasoulzadeh.einkdash.util.Ui
+import com.arashrasoulzadeh.einkdash.settings.AppPrefs
+import com.arashrasoulzadeh.einkdash.settings.SettingsActivity
+import android.view.MotionEvent
 import com.arashrasoulzadeh.einkdash.widgets.WidgetRegistry
 
-class HomeActivity : Activity() {
+class HomeActivity : BaseActivity() {
 
     private lateinit var store: LayoutStore
     private lateinit var layout: DashboardLayout
@@ -34,6 +38,27 @@ class HomeActivity : Activity() {
     private var pageIndex = 0
     private var editing = false
     private val handler = Handler(Looper.getMainLooper())
+    private lateinit var appPrefs: AppPrefs
+    private var startLanguage = ""
+
+    /** Always-on display: frontlight off after a quiet spell; any touch brings it back. */
+    private val dimNow = Runnable { setBrightness(0f) }
+
+    private fun setBrightness(value: Float) {
+        window.attributes = window.attributes.apply { screenBrightness = value }
+    }
+
+    private fun scheduleDim() {
+        handler.removeCallbacks(dimNow)
+        setBrightness(WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
+        val min = appPrefs.dimAfterMin
+        if (min > 0) handler.postDelayed(dimNow, min * 60_000L)
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) scheduleDim()
+        return super.dispatchTouchEvent(ev)
+    }
 
     /** One ticker for every widget: aligned to the minute, faster only when a widget asks. */
     private val tick = object : Runnable {
@@ -52,7 +77,8 @@ class HomeActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        appPrefs = AppPrefs(this)
+        startLanguage = appPrefs.language
         store = LayoutStore(this)
         layout = store.load(orientation)
 
@@ -108,6 +134,14 @@ class HomeActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        if (appPrefs.language != startLanguage) { recreate(); return }
+        // A restored backup may have replaced the saved layout.
+        layout = store.load(orientation)
+        pageIndex = pageIndex.coerceAtMost(layout.pages.size - 1)
+        grid.page = page
+        if (appPrefs.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        scheduleDim()
         // Settings screens may have changed widget data; rebuild and restart the ticker.
         grid.rebuild()
         handler.removeCallbacks(tick)
@@ -117,6 +151,7 @@ class HomeActivity : Activity() {
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(tick)
+        handler.removeCallbacks(dimNow)
     }
 
     private fun setupSelected() {
@@ -136,7 +171,7 @@ class HomeActivity : Activity() {
 
     private fun showPage() {
         grid.page = page
-        pageLabel.text = "${pageIndex + 1}/${layout.pages.size}"
+        pageLabel.text = com.arashrasoulzadeh.einkdash.util.Fa.digits(this, "${pageIndex + 1}/${layout.pages.size}")
         refresh()
     }
 
@@ -206,7 +241,11 @@ class HomeActivity : Activity() {
 
     private fun pageMenu() {
         AlertDialog.Builder(this)
-            .setItems(arrayOf(getString(R.string.page_add), getString(R.string.page_delete))) { _, i ->
+            .setItems(arrayOf(getString(R.string.page_add), getString(R.string.page_delete), getString(R.string.settings))) { _, i ->
+                if (i == 2) {
+                    setEditing(false)
+                    return@setItems startActivity(Intent(this, SettingsActivity::class.java))
+                }
                 if (i == 0) {
                     layout.addPage(); pageIndex = layout.pages.size - 1
                 } else if (layout.pages.size > 1) {

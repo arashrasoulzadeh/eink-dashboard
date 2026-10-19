@@ -1,6 +1,7 @@
 package com.arashrasoulzadeh.einkdash.notes
 
 import android.app.Activity
+import com.arashrasoulzadeh.einkdash.util.BaseActivity
 import android.graphics.Paint
 import android.os.Bundle
 import android.widget.Button
@@ -14,7 +15,7 @@ import com.arashrasoulzadeh.einkdash.eink.Eink
 import com.arashrasoulzadeh.einkdash.util.Ui
 
 /** Checklist editor. Long-press an item to delete it. */
-class NotesActivity : Activity() {
+class NotesActivity : BaseActivity() {
 
     private lateinit var db: NotesDb
     private lateinit var list: LinearLayout
@@ -48,6 +49,7 @@ class NotesActivity : Activity() {
                 text = note.text
                 textSize = 18f
                 setTextColor(Ui.INK)
+                typeface = Ui.regular
                 isChecked = note.done
                 minHeight = (48 * resources.displayMetrics.density).toInt()
                 if (note.done) paintFlags = paintFlags or Paint.STRIKE_THRU_TEXT_FLAG

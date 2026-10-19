@@ -1,6 +1,7 @@
 package com.arashrasoulzadeh.einkdash.launcher
 
 import android.app.Activity
+import com.arashrasoulzadeh.einkdash.util.BaseActivity
 import android.content.Intent
 import android.content.pm.ResolveInfo
 import android.os.Bundle
@@ -15,7 +16,7 @@ import com.arashrasoulzadeh.einkdash.eink.Eink
 import com.arashrasoulzadeh.einkdash.util.Ui
 
 /** Paged app grid; no scrolling, since scrolling ghosts on e-ink. */
-class AppDrawerActivity : Activity() {
+class AppDrawerActivity : BaseActivity() {
 
     private val cols = 4
     private val rows = 5
@@ -66,6 +67,7 @@ class AppDrawerActivity : Activity() {
                         text = app.loadLabel(pm)
                         textSize = 14f
                         setTextColor(Ui.INK)
+                        typeface = Ui.regular
                         maxLines = 2
                         compoundDrawablePadding = Ui.dp(context, 6f)
                         setCompoundDrawables(null, app.loadIcon(pm).toGrayscale(Ui.dp(context, 48f)), null, null)
@@ -76,7 +78,7 @@ class AppDrawerActivity : Activity() {
             }
             grid.addView(row, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
         }
-        pageLabel.text = "${page + 1}/$pageCount"
+        pageLabel.text = com.arashrasoulzadeh.einkdash.util.Fa.digits(this, "${page + 1}/$pageCount")
         Eink.fullRefresh(window.decorView)
     }
 
@@ -95,11 +97,6 @@ class AppDrawerActivity : Activity() {
         KeyEvent.KEYCODE_PAGE_DOWN, KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT -> { flip(1); true }
         KeyEvent.KEYCODE_PAGE_UP, KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_DPAD_LEFT -> { flip(-1); true }
         else -> super.onKeyDown(keyCode, event)
-    }
-
-    override fun finish() {
-        super.finish()
-        overridePendingTransition(0, 0)
     }
 }
 
