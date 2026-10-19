@@ -19,23 +19,20 @@ class LayoutStore(context: Context) {
         prefs.edit().putString(key(orientation == Configuration.ORIENTATION_LANDSCAPE), layout.toJson()).apply()
     }
 
-    // v3: the instrument-panel defaults; bumping the key moves existing installs onto them.
-    private fun key(landscape: Boolean) = if (landscape) "layout3_landscape" else "layout3_portrait"
+    // v4: stacked spots; bumping the key moves existing installs onto them.
+    private fun key(landscape: Boolean) = if (landscape) "layout4_landscape" else "layout4_portrait"
 
-    /** First run: page 1 is the panel (clock, latency, weather, pomodoro); page 2 is notes and reading (battery lives in the footer). */
+    /** First run: one page; spots below the clock are stacks you swipe through. */
     private fun defaultLayout(landscape: Boolean, cols: Int, rows: Int): DashboardLayout {
-        val pages = if (landscape) listOf(
-            listOf("clock" to intArrayOf(0, 0, 3, 2), "latency" to intArrayOf(3, 0, 3, 2),
-                "weather" to intArrayOf(0, 2, 3, 2), "pomodoro" to intArrayOf(3, 2, 3, 2)),
-            listOf("notes" to intArrayOf(0, 0, 4, 4), "reading" to intArrayOf(4, 0, 2, 4)),
+        val spots = if (landscape) listOf(
+            listOf("clock") to intArrayOf(0, 0, 3, 2), listOf("latency", "notes") to intArrayOf(3, 0, 3, 2),
+            listOf("weather", "reading") to intArrayOf(0, 2, 3, 2), listOf("pomodoro", "battery") to intArrayOf(3, 2, 3, 2),
         ) else listOf(
-            listOf("clock" to intArrayOf(0, 0, 4, 2), "latency" to intArrayOf(0, 2, 4, 2),
-                "weather" to intArrayOf(0, 4, 2, 2), "pomodoro" to intArrayOf(2, 4, 2, 2)),
-            listOf("notes" to intArrayOf(0, 0, 4, 4), "reading" to intArrayOf(0, 4, 4, 2)),
+            listOf("clock") to intArrayOf(0, 0, 4, 2), listOf("latency", "notes") to intArrayOf(0, 2, 4, 2),
+            listOf("weather", "reading") to intArrayOf(0, 4, 2, 2), listOf("pomodoro", "battery") to intArrayOf(2, 4, 2, 2),
         )
-        var id = 1L
-        return DashboardLayout(cols, rows, pages.map { spots ->
-            Page(cols, rows).apply { spots.forEach { (type, g) -> tryUpdate(Placement(id++, type, g[0], g[1], g[2], g[3])) } }
-        }.toMutableList())
+        val page = Page(cols, rows)
+        spots.forEachIndexed { i, (stack, g) -> page.tryUpdate(Placement(i + 1L, stack, g[0], g[1], g[2], g[3])) }
+        return DashboardLayout(cols, rows, mutableListOf(page))
     }
 }

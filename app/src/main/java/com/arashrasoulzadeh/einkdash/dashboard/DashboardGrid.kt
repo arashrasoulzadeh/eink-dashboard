@@ -27,8 +27,8 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
 
     var onLongPress: (() -> Unit)? = null
     var onCellTap: ((col: Int, row: Int) -> Unit)? = null
-    /** +1 = next page, -1 = previous (already mirrored for RTL). */
-    var onSwipe: ((Int) -> Unit)? = null
+    /** Swipe on a stacked spot: +1 = next widget, -1 = previous (already mirrored for RTL). */
+    var onStackSwipe: ((Placement, Int) -> Unit)? = null
 
     private val density = resources.displayMetrics.density
     private val thin = Paint().apply { color = 0xFF000000.toInt(); strokeWidth = 1f * density; style = Paint.Style.STROKE }
@@ -38,15 +38,17 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
     private val gestures = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent) = true
         override fun onLongPress(e: MotionEvent) {
-            longPressed = true
+            swallow = true
             onLongPress?.invoke()
         }
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
             if (editMode || e1 == null) return false
             val dx = e2.x - e1.x
-            if (kotlin.math.abs(dx) < width / 5f || kotlin.math.abs(dx) < kotlin.math.abs(e2.y - e1.y)) return false
+            if (kotlin.math.abs(dx) < 40 * density || kotlin.math.abs(dx) < kotlin.math.abs(e2.y - e1.y)) return false
             val forward = if (isRtl()) dx > 0 else dx < 0
-            onSwipe?.invoke(if (forward) 1 else -1)
+            val item = itemAt(e1.x, e1.y)?.takeIf { it.stack.size > 1 } ?: return false
+            onStackSwipe?.invoke(item, if (forward) 1 else -1)
+            swallow = true
             return true
         }
 
@@ -63,9 +65,40 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
     })
 
     private val ids = HashMap<View, Long>()
-    private var longPressed = false
+    /** Set by a long-press or a stack swipe: the child must not also see a tap. */
+    private var swallow = false
+
+    private val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF000000.toInt() }
+    private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF000000.toInt(); style = Paint.Style.STROKE; strokeWidth = 1.2f * density }
 
     init { setWillNotDraw(false) }
+
+    /** Room kept free at the bottom of a stacked cell for its position dots. */
+    private fun stackInset(item: Placement) = if (item.stack.size > 1) (12 * density).toInt() else 0
+
+    private fun itemAt(x: Float, y: Float): Placement? {
+        val p = page ?: return null
+        val col = (x / (width.toFloat() / p.cols)).toInt().coerceIn(0, p.cols - 1)
+        val row = (y / (height.toFloat() / p.rows)).toInt().coerceIn(0, p.rows - 1)
+        return p.at(if (isRtl()) p.cols - 1 - col else col, row)
+    }
+
+    /** Stack position dots, drawn over the widget at the bottom of its cell. */
+    override fun dispatchDraw(canvas: Canvas) {
+        super.dispatchDraw(canvas)
+        val r = IntArray(4)
+        page?.items?.filter { it.stack.size > 1 }?.forEach { item ->
+            cellRect(item, r)
+            val step = 12 * density
+            val cy = r[3] - 7 * density
+            val x0 = (r[0] + r[2]) / 2f - step * (item.stack.size - 1) / 2
+            item.stack.indices.forEach { i ->
+                val idx = if (isRtl()) item.stack.size - 1 - i else i
+                if (idx == item.active) canvas.drawCircle(x0 + i * step, cy, 3.5f * density, dot)
+                else canvas.drawCircle(x0 + i * step, cy, 3f * density, ring)
+            }
+        }
+    }
 
     fun refreshWidgets() {
         for (i in 0 until childCount) (getChildAt(i) as? WidgetView)?.refresh()
@@ -110,7 +143,7 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
             cellRect(item, r, w, h)
             child.measure(
                 MeasureSpec.makeMeasureSpec(maxOf(0, r[2] - r[0]), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(maxOf(0, r[3] - r[1]), MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(maxOf(0, r[3] - r[1] - stackInset(item)), MeasureSpec.EXACTLY),
             )
         }
     }
@@ -121,7 +154,7 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
             val child = getChildAt(i)
             val item = itemFor(child) ?: continue
             cellRect(item, rect)
-            child.layout(rect[0], rect[1], rect[2], rect[3])
+            child.layout(rect[0], rect[1], rect[2], rect[3] - stackInset(item))
         }
     }
 
@@ -153,11 +186,11 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
     private fun itemFor(child: View): Placement? = page?.items?.firstOrNull { it.id == ids[child] }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.actionMasked == MotionEvent.ACTION_DOWN) longPressed = false
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) swallow = false
         gestures.onTouchEvent(ev)
         if (editMode) return true
-        // After a long-press opens edit mode, cancel the child's tap so the widget doesn't also open.
-        if (longPressed) {
+        // Fling is detected on UP, before the child sees it; send CANCEL instead so the widget doesn't open.
+        if (swallow) {
             if (ev.actionMasked == MotionEvent.ACTION_UP) {
                 super.dispatchTouchEvent(MotionEvent.obtain(ev).apply { action = MotionEvent.ACTION_CANCEL })
             }

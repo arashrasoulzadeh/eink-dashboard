@@ -3,9 +3,29 @@ package com.arashrasoulzadeh.einkdash.dashboard
 import org.json.JSONArray
 import org.json.JSONObject
 
-data class Placement(val id: Long, val type: String, val col: Int, val row: Int, val w: Int, val h: Int) {
+/**
+ * A spot on the grid holding a stack of widgets; swiping the spot cycles [active].
+ * Most spots hold one widget.
+ */
+data class Placement(
+    val id: Long, val stack: List<String>, val col: Int, val row: Int, val w: Int, val h: Int, val active: Int = 0,
+) {
+    constructor(id: Long, type: String, col: Int, row: Int, w: Int, h: Int) : this(id, listOf(type), col, row, w, h)
+
+    val type: String get() = stack[active.coerceIn(0, stack.size - 1)]
+
     fun overlaps(o: Placement) =
         col < o.col + o.w && o.col < col + w && row < o.row + o.h && o.row < row + h
+
+    fun cycled(delta: Int) = copy(active = ((active + delta) % stack.size + stack.size) % stack.size)
+
+    /** Adds [t] to the stack and shows it. */
+    fun pushed(t: String) = copy(stack = stack + t, active = stack.size)
+
+    /** Drops the showing widget; null when the stack would be empty. */
+    fun popped(): Placement? =
+        if (stack.size <= 1) null
+        else copy(stack = stack.filterIndexed { i, _ -> i != active }, active = active.coerceAtMost(stack.size - 2))
 }
 
 /** One grid page. Pure logic, no Android views, so it stays easy to test. */
@@ -48,7 +68,7 @@ class DashboardLayout(val cols: Int, val rows: Int, val pages: MutableList<Page>
             pages.forEach { page ->
                 put(JSONArray().apply {
                     page.items.forEach {
-                        put(JSONObject().put("id", it.id).put("type", it.type)
+                        put(JSONObject().put("id", it.id).put("stack", JSONArray(it.stack)).put("active", it.active)
                             .put("col", it.col).put("row", it.row).put("w", it.w).put("h", it.h))
                     }
                 })
@@ -67,8 +87,12 @@ class DashboardLayout(val cols: Int, val rows: Int, val pages: MutableList<Page>
                     Page(cols, rows).apply {
                         for (j in 0 until items.length()) {
                             val it = items.getJSONObject(j)
-                            tryUpdate(Placement(it.getLong("id"), it.getString("type"),
-                                it.getInt("col"), it.getInt("row"), it.getInt("w"), it.getInt("h")))
+                            // "type" is the pre-stack format (one widget per spot).
+                            val stack = it.optJSONArray("stack")?.let { a -> List(a.length()) { k -> a.getString(k) } }
+                                ?: listOf(it.getString("type"))
+                            if (stack.isEmpty()) continue
+                            tryUpdate(Placement(it.getLong("id"), stack,
+                                it.getInt("col"), it.getInt("row"), it.getInt("w"), it.getInt("h"), it.optInt("active")))
                         }
                     }
                 }

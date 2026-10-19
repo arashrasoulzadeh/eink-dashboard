@@ -25,7 +25,7 @@ class LatencyWidget : DashboardWidget {
         val store = LatencyStore(context)
         val rows = fill(LinearLayout(context).apply { orientation = LinearLayout.VERTICAL })
         var probing = false
-        var shownUrls: List<String> = emptyList()
+        var shownUrls: List<String>? = null
 
         init { setOnClickListener { open(context) } }
 

@@ -87,7 +87,9 @@ class HomeActivity : BaseActivity() {
         grid = DashboardGrid(this).apply {
             onLongPress = { if (!editing) setEditing(true) }
             onCellTap = ::onCellTap
-            onSwipe = { flip(it) }
+            onStackSwipe = { item, dir ->
+                if (this@HomeActivity.page.tryUpdate(item.cycled(dir))) { rebuild(); save(); refresh() }
+            }
         }
         pageLabel = Ui.text(this, 18f, Ui.bold).apply {
             gravity = Gravity.CENTER
@@ -196,7 +198,7 @@ class HomeActivity : BaseActivity() {
 
     private fun showPage() {
         grid.page = page
-        pageLabel.text = (0 until layout.pages.size).joinToString(" ") { if (it == pageIndex) "●" else "○" }
+        pageLabel.text = if (layout.pages.size < 2) "" else (0 until layout.pages.size).joinToString(" ") { if (it == pageIndex) "●" else "○" }
         refresh()
     }
 
@@ -246,6 +248,9 @@ class HomeActivity : BaseActivity() {
 
     private fun removeSelected() {
         val sel = selected ?: return toast(R.string.select_first)
+        // Removes only the showing widget of a stack; the spot goes when its last widget does.
+        val rest = sel.popped()
+        if (rest != null) { page.tryUpdate(rest); grid.rebuild(); save(); refresh(); return }
         page.items.removeAll { it.id == sel.id }
         grid.selectedId = null
         grid.rebuild(); save(); refresh()
@@ -256,6 +261,11 @@ class HomeActivity : BaseActivity() {
         AlertDialog.Builder(this)
             .setItems(widgets.map { getString(it.titleRes) }.toTypedArray()) { _, i ->
                 val w = widgets[i]
+                selected?.let { sel ->
+                    // With a spot selected, Add stacks onto it instead of finding a new spot.
+                    page.tryUpdate(sel.pushed(w.type)); grid.rebuild(); save(); refresh()
+                    return@setItems
+                }
                 val id = layout.nextId()
                 val spot = page.firstFree(id, w.type, w.defaultW, w.defaultH) ?: page.firstFree(id, w.type, 1, 1)
                 if (spot == null) toast(R.string.no_space)

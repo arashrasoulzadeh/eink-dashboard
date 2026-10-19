@@ -67,7 +67,8 @@ A single scheduler ticks the widgets and batches all their view updates into one
 - [x] UI pass: "paper" look (rules instead of boxes, light figures, uppercase section labels), flat outlined buttons, shared `Ui` kit and screen header
 - [x] Edit bar has Setup: opens the selected widget's settings
 - [x] Home redesign ("instrument panel"): self-sizing figures, latency bar charts per endpoint, pomodoro ring, day-progress meter, notebook-style notes; slim footer (Apps · page dots · battery/online) with swipe paging
-  - Default page 1: clock, latency, weather, pomodoro; page 2: notes, reading. Layout key bumped to v3, so earlier saved layouts reset to these defaults
+- [x] Stacked spots: each grid spot holds a stack of widgets; swipe the spot to cycle, dots show the position. Edit mode: Add with a spot selected stacks onto it, Remove drops only the showing widget
+  - Default single page: Clock | Latency ↔ Notes | Weather ↔ Reading | Pomodoro ↔ Battery. Layout key v4 resets earlier layouts once
 - [x] 5. Vazirmatn font (all text), in-app language switch (System/English/فارسی), always-on + frontlight off after idle (default 2 min), JSON backup export/import (system picker on 4.4+, Downloads file on 4.2/4.3), GitHub Actions build + tag releases, README
   - Verified on the API 36 emulator: Persian/RTL dashboard, edit mode and settings; backup export → import round trip
   - [ ] Push to GitHub to run CI for the first time; the release APK is debug-signed

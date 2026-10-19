@@ -51,9 +51,10 @@ class WeatherWidget : DashboardWidget {
         override fun refresh() {
             label(R.string.widget_weather, store.placeName?.substringBefore(","))
             if (!store.hasLocation) {
-                temp.text = "—°"; cond.setText(R.string.weather_tap_setup); range.text = ""; days.removeAllViews()
+                temp.visibility = GONE; cond.setText(R.string.weather_tap_setup); range.text = ""; days.removeAllViews()
                 return
             }
+            temp.visibility = VISIBLE
             render(store.cache)
             if (!fetching && store.isStale(System.currentTimeMillis())) {
                 fetching = true
