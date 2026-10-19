@@ -138,3 +138,17 @@ class Meter(context: Context) : View(context) {
         else canvas.drawRect(1f, 1f, 1 + fw, h - 1, fill)
     }
 }
+
+/** Four corner brackets: the "open full screen" affordance. */
+class ExpandIcon(context: Context) : View(context) {
+    private val pen = ink(context, 1.8f)
+
+    override fun onDraw(canvas: Canvas) {
+        val s = min(width, height) * 0.5f
+        val l = (width - s) / 2; val t = (height - s) / 2; val r = l + s; val b = t + s; val k = s * 0.36f
+        canvas.drawLine(l, t, l + k, t, pen); canvas.drawLine(l, t, l, t + k, pen)
+        canvas.drawLine(r, t, r - k, t, pen); canvas.drawLine(r, t, r, t + k, pen)
+        canvas.drawLine(l, b, l + k, b, pen); canvas.drawLine(l, b, l, b - k, pen)
+        canvas.drawLine(r, b, r - k, b, pen); canvas.drawLine(r, b, r, b - k, pen)
+    }
+}

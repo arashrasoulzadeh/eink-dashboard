@@ -42,6 +42,7 @@
         </activity>
 
         <activity android:name=".launcher.AppDrawerActivity" android:exported="false" />
+        <activity android:name=".launcher.FullscreenActivity" android:exported="false" />
         <activity android:name=".notes.NotesActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".weather.WeatherSettingsActivity" android:exported="false" />
         <activity android:name=".latency.LatencySettingsActivity" android:exported="false" />

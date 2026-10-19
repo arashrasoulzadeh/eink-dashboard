@@ -111,7 +111,7 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
         removeAllViews()
         ids.clear()
         page?.items?.forEach { item ->
-            val view = WidgetRegistry.get(item.type)?.createView(context)?.also { it.refresh() } ?: View(context)
+            val view = WidgetRegistry.get(item.type)?.createView(context)?.also { it.type = item.type; it.refresh() } ?: View(context)
             ids[view] = item.id
             addView(view)
         }

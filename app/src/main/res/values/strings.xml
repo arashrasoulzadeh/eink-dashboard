@@ -94,4 +94,7 @@
     <string name="reading_none">No reader yet</string>
     <string name="pomo_unit_min">min</string>
     <string name="pomo_unit_sec">sec</string>
+    <string name="pomo_unit_min_sec">min : sec</string>
+    <string name="empty" translatable="false"></string>
+    <string name="close">Close</string>
 </resources>

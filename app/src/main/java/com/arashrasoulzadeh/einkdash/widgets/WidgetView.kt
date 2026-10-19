@@ -6,7 +6,11 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.content.Intent
+import com.arashrasoulzadeh.einkdash.R
 import com.arashrasoulzadeh.einkdash.eink.Eink
+import com.arashrasoulzadeh.einkdash.launcher.FullscreenActivity
+import com.arashrasoulzadeh.einkdash.util.ExpandIcon
 import com.arashrasoulzadeh.einkdash.util.Fa
 import com.arashrasoulzadeh.einkdash.util.Ui
 
@@ -17,13 +21,29 @@ import com.arashrasoulzadeh.einkdash.util.Ui
 abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(context) {
 
     protected val dp = resources.displayMetrics.density
-    protected val title: TextView? = if (titleRes != 0) Ui.label(context, titleRes) else null
+    protected val title: TextView = Ui.label(context, titleRes.takeIf { it != 0 } ?: R.string.empty)
+
+    /** Widget type; set by whoever hosts the view so the expand icon knows what to open. */
+    var type: String? = null
+
+    /** Header expand icon; hidden when the widget is already full screen. */
+    val expand = ExpandIcon(context).apply {
+        setOnClickListener {
+            type?.let { t -> context.startActivity(Intent(context, FullscreenActivity::class.java).putExtra(FullscreenActivity.EXTRA_TYPE, t)) }
+        }
+    }
 
     init {
         orientation = VERTICAL
         val pad = (12 * dp).toInt()
-        setPadding(pad, pad, pad, pad)
-        title?.let { addView(it); addView(Ui.gap(context, 6f)) }
+        setPadding(pad, (6 * dp).toInt(), (6 * dp).toInt(), pad)
+        val icon = (36 * dp).toInt()
+        addView(LinearLayout(context).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            addView(title, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+            addView(expand, LayoutParams(icon, icon))
+        })
+        addView(Ui.gap(context, 2f))
     }
 
     protected fun line(sizeSp: Float, face: Typeface = Ui.regular, center: Boolean = false): TextView =
@@ -47,7 +67,7 @@ abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(contex
 
     protected fun label(textRes: Int, extra: String? = null) {
         val base = context.getString(textRes)
-        title?.text = (if (extra.isNullOrEmpty()) base else "$base · $extra").uppercase(resources.configuration.locale)
+        title.text = (if (extra.isNullOrEmpty()) base else "$base · $extra").uppercase(resources.configuration.locale)
     }
 
     abstract fun refresh()

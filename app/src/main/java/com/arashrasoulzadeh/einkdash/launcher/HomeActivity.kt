@@ -39,6 +39,7 @@ class HomeActivity : BaseActivity() {
     private var pageIndex = 0
     private var editing = false
     private val handler = Handler(Looper.getMainLooper())
+    private var lastFull = 0L
     private lateinit var appPrefs: AppPrefs
     private var startLanguage = ""
 
@@ -66,8 +67,9 @@ class HomeActivity : BaseActivity() {
         override fun run() {
             grid.refreshWidgets()
             updateStatus()
-            Eink.fullRefresh(window.decorView)
             val now = System.currentTimeMillis()
+            // Seconds-level ticks (running pomodoro) redraw partially; the anti-ghosting flash runs once a minute.
+            if (now % 60_000 < 1_500 || now - lastFull > 60_000) { Eink.fullRefresh(window.decorView); lastFull = now }
             val delay = minOf(60_000 - now % 60_000, grid.nextDelayMs(now)).coerceAtLeast(250)
             handler.postDelayed(this, delay)
         }

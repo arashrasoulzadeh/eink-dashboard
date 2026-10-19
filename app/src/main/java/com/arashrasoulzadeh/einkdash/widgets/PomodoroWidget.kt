@@ -8,7 +8,7 @@ import com.arashrasoulzadeh.einkdash.eink.Eink
 import com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro
 import com.arashrasoulzadeh.einkdash.util.Ring
 
-/** Progress ring with the time left inside. Tap to start or stop; per-second only in the last minute. */
+/** Progress ring with mm:ss left inside. Tap to start or stop. */
 class PomodoroWidget : DashboardWidget {
     override val type = "pomodoro"
     override val titleRes = R.string.widget_pomodoro
@@ -42,21 +42,17 @@ class PomodoroWidget : DashboardWidget {
             val left = maxOf(0L, end - System.currentTimeMillis())
             label(R.string.widget_pomodoro, context.getString(if (isBreak) R.string.pomo_break else R.string.pomo_focus))
             ring.progress = 1f - left.toFloat() / total
-            if (left <= 60_000) {
-                ring.label = num("0:%02d".format((left + 999) / 1000))
-                ring.unit = context.getString(R.string.pomo_unit_sec)
-            } else {
-                ring.label = num("${(left + 59_999) / 60_000}")
-                ring.unit = context.getString(R.string.pomo_unit_min)
-            }
+            val secs = (left + 999) / 1000
+            ring.label = num("%d:%02d".format(secs / 60, secs % 60))
+            ring.unit = context.getString(R.string.pomo_unit_min_sec)
             hint.setText(R.string.pomo_tap_stop)
         }
 
         override fun nextDelayMs(now: Long): Long {
             val end = Pomodoro.endAt(context)
             if (end == 0L) return Long.MAX_VALUE
-            val left = end - now
-            return if (left <= 61_000) 1000L else (left - 60_000) % 60_000 + 1
+            // Tick on the second boundary of the countdown.
+            return ((end - now) % 1000).let { if (it <= 0) 1000 else it } + 5
         }
     }
 

@@ -91,4 +91,6 @@
     <string name="reading_none">کتاب‌خوانی انتخاب نشده</string>
     <string name="pomo_unit_min">دقیقه</string>
     <string name="pomo_unit_sec">ثانیه</string>
+    <string name="pomo_unit_min_sec">دقیقه : ثانیه</string>
+    <string name="close">بستن</string>
 </resources>
