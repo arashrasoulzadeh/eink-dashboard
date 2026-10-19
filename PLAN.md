@@ -56,7 +56,7 @@ A single scheduler ticks the widgets and batches all their view updates into one
   - Edit bar: Add, Remove, W±/H± resize, Page (add/delete), Done; Back also exits edit mode
   - Widgets are placeholders behind `DashboardWidget` / `WidgetRegistry` until phases 2–4
   - Verified on an API 36 emulator (render, select, remove, move, persist across restart); layout logic covered by JUnit tests
-  - [ ] Verify on Android 4.2 (Fidibook), landscape layout and RTL column mirroring
+  - [ ] Verify on Android 4.2 (Fidibook) and the landscape layout (RTL mirroring checked on the emulator)
 - [x] 2. Clock (Jalali/Gregorian), battery/Wi-Fi, notes checklist (SQLite)
 - [x] 3. Weather (Open-Meteo, device location or city search, 2 h cache), API latency (5 min, last 10 results)
   - Networking changed: plain `HttpURLConnection` with TLS 1.2 forced on for API < 20 (no OkHttp/Conscrypt); weather falls back to HTTP if TLS fails on old root stores
