@@ -21,6 +21,10 @@ android {
             isMinifyEnabled = false
         }
     }
+    lint {
+        // Back is swallowed on purpose (launcher); predictive back is not opted into.
+        disable += "GestureBackNavigation"
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

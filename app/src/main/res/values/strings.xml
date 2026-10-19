@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Eink Dash</string>
     <string name="apps">Apps</string>
-    <string name="prev">‹</string>
-    <string name="next">›</string>
+    <string name="prev" translatable="false">‹</string>
+    <string name="next" translatable="false">›</string>
     <string name="widget_clock">Clock</string>
     <string name="widget_weather">Weather</string>
     <string name="widget_battery">Battery &amp; Wi-Fi</string>
@@ -23,4 +23,50 @@
     <string name="no_space">No space there</string>
     <string name="select_first">Tap a widget first</string>
     <string name="last_page">Can\'t delete the last page</string>
+    <string name="edit_setup">Setup</string>
+    <string name="nothing_to_setup">Nothing to set up</string>
+    <string name="charging">charging</string>
+    <string name="wifi_on">Wi-Fi: connected</string>
+    <string name="wifi_off">Wi-Fi: off</string>
+    <string name="notes_hint">New item</string>
+    <string name="notes_empty">No open items. Tap to add.</string>
+    <string name="notes_delete_hint">Tap to check off · long-press to delete</string>
+    <string name="weather_city_hint">City name</string>
+    <string name="weather_current">Location: %1$s</string>
+    <string name="weather_none">not set</string>
+    <string name="weather_use_device">Use device location</string>
+    <string name="weather_search">Search</string>
+    <string name="weather_no_results">No cities found</string>
+    <string name="weather_no_location">Location unavailable, search a city instead</string>
+    <string name="weather_device">Device location</string>
+    <string name="weather_tap_setup">Tap to set location</string>
+    <string name="network_error">Network error</string>
+    <string name="wx_clear">Clear</string>
+    <string name="wx_partly">Partly cloudy</string>
+    <string name="wx_cloudy">Cloudy</string>
+    <string name="wx_fog">Fog</string>
+    <string name="wx_drizzle">Drizzle</string>
+    <string name="wx_rain">Rain</string>
+    <string name="wx_snow">Snow</string>
+    <string name="wx_storm">Storm</string>
+    <string name="wx_unknown">—</string>
+    <string name="latency_hint" translatable="false">https://example.com</string>
+    <string name="latency_help">One URL per line. Checked every 5 minutes.</string>
+    <string name="latency_tap_setup">Tap to add URLs</string>
+    <string name="latency_down">DOWN</string>
+    <string name="save">Save</string>
+    <string name="pomo_tap_start">Tap to start</string>
+    <string name="pomo_tap_stop">Tap to stop</string>
+    <string name="pomo_focus">Focus</string>
+    <string name="pomo_break">Break</string>
+    <string name="pomo_work_done">Focus done</string>
+    <string name="pomo_break_done">Break over</string>
+    <string name="pomo_start_break">Start break</string>
+    <string name="pomo_start_work">Start focus</string>
+    <string name="pomo_dismiss">Dismiss</string>
+    <string name="pomo_length">Focus length</string>
+    <string name="pomo_minutes">%1$d min</string>
+    <string name="reading_pick">Pick your reader app</string>
+    <string name="reading_tap">Tap to continue</string>
+    <string name="back">Back</string>
 </resources>

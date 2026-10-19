@@ -8,6 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import com.arashrasoulzadeh.einkdash.widgets.WidgetRegistry
+import com.arashrasoulzadeh.einkdash.widgets.WidgetView
 
 /**
  * Lays widget views out on a cols x rows grid. Thin dividers only; no shadows or fills.
@@ -34,7 +35,10 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
 
     private val gestures = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent) = true
-        override fun onLongPress(e: MotionEvent) { onLongPress?.invoke() }
+        override fun onLongPress(e: MotionEvent) {
+            longPressed = true
+            onLongPress?.invoke()
+        }
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             if (!editMode) return false
             val p = page ?: return false
@@ -47,13 +51,24 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
         }
     })
 
+    private val ids = HashMap<View, Long>()
+    private var longPressed = false
+
     init { setWillNotDraw(false) }
+
+    fun refreshWidgets() {
+        for (i in 0 until childCount) (getChildAt(i) as? WidgetView)?.refresh()
+    }
+
+    fun nextDelayMs(now: Long): Long =
+        (0 until childCount).mapNotNull { getChildAt(it) as? WidgetView }.minOfOrNull { it.nextDelayMs(now) } ?: Long.MAX_VALUE
 
     fun rebuild() {
         removeAllViews()
+        ids.clear()
         page?.items?.forEach { item ->
-            val view = WidgetRegistry.get(item.type)?.createView(context) ?: View(context)
-            view.tag = item.id
+            val view = WidgetRegistry.get(item.type)?.createView(context)?.also { it.refresh() } ?: View(context)
+            ids[view] = item.id
             addView(view)
         }
         requestLayout()
@@ -110,15 +125,33 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
         val rect = IntArray(4)
         pg.items.forEach { item ->
             cellRect(item, rect)
-            val paint = if (editMode && item.id == selectedId) thick else thin
-            canvas.drawRect(rect[0].toFloat(), rect[1].toFloat(), rect[2].toFloat(), rect[3].toFloat(), paint)
+            val l = rect[0].toFloat(); val t = rect[1].toFloat(); val r = rect[2].toFloat(); val b = rect[3].toFloat()
+            if (editMode) {
+                canvas.drawRect(l, t, r, b, if (item.id == selectedId) thick else thin)
+            } else {
+                // Paper look: a rule under each widget and a hairline between side-by-side ones.
+                if (item.row + item.h < pg.rows) canvas.drawLine(l, b + gap, r, b + gap, thin)
+                if (item.col > 0) {
+                    val x = if (isRtl()) r + gap else l - gap
+                    canvas.drawLine(x, t + gap, x, b - gap, thin)
+                }
+            }
         }
     }
 
-    private fun itemFor(child: View): Placement? = page?.items?.firstOrNull { it.id == child.tag }
+    private fun itemFor(child: View): Placement? = page?.items?.firstOrNull { it.id == ids[child] }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) longPressed = false
         gestures.onTouchEvent(ev)
-        return if (editMode) true else super.dispatchTouchEvent(ev) || true
+        if (editMode) return true
+        // After a long-press opens edit mode, cancel the child's tap so the widget doesn't also open.
+        if (longPressed) {
+            if (ev.actionMasked == MotionEvent.ACTION_UP) {
+                super.dispatchTouchEvent(MotionEvent.obtain(ev).apply { action = MotionEvent.ACTION_CANCEL })
+            }
+            return true
+        }
+        return super.dispatchTouchEvent(ev) || true
     }
 }

@@ -59,9 +59,15 @@ A single scheduler ticks the widgets and batches all their view updates into one
   - Widgets are placeholders behind `DashboardWidget` / `WidgetRegistry` until phases 2–4
   - Verified on an API 36 emulator (render, select, remove, move, persist across restart); layout logic covered by JUnit tests
   - [ ] Verify on Android 4.2 (Fidibook), landscape layout and RTL column mirroring
-- [ ] 2. Clock (Jalali/Gregorian), battery/Wi-Fi, notes checklist
-- [ ] 3. Weather (Open-Meteo, network location + city fallback), API latency (OkHttp 3.12 + Conscrypt)
-- [ ] 4. Pomodoro (full-screen inverted alert), continue reading (Fidibo first)
+- [x] 2. Clock (Jalali/Gregorian), battery/Wi-Fi, notes checklist (SQLite)
+- [x] 3. Weather (Open-Meteo, device location or city search, 2 h cache), API latency (5 min, last 10 results)
+  - Networking changed: plain `HttpURLConnection` with TLS 1.2 forced on for API < 20 (no OkHttp/Conscrypt); weather falls back to HTTP if TLS fails on old root stores
+  - [ ] Verify a real weather fetch and latency probe; the emulator couldn't reach Open-Meteo without the proxy
+- [x] 4. Pomodoro (AlarmManager + full-screen inverted alert), continue reading (auto-picks an app whose package contains "fidibo", else a picker)
+  - Reader apps don't expose the current book, so the widget shows the app, not the title
+  - [ ] Let a pomodoro run out to check the alert screen; confirm Fidibo's package name on the device
+- [x] UI pass: "paper" look (rules instead of boxes, light figures, uppercase section labels), flat outlined buttons, shared `Ui` kit and screen header
+- [x] Edit bar has Setup: opens the selected widget's settings
 - [ ] 5. E-ink polish, always-on idle mode, Persian/RTL QA, JSON export/import, GitHub release
 
 Build note: `~/.gradle/gradle.properties` routes Gradle through a proxy at 127.0.0.1:10808. When that proxy is down, build with `--offline`.

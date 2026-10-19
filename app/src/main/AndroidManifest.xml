@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
+    <!-- Android 11+ package visibility: the launcher must see every launchable app. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <!-- Cleartext is only used as a fallback for weather on old devices whose root certificates are outdated. -->
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.EinkDash">
 
         <activity
@@ -21,8 +38,16 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".launcher.AppDrawerActivity" android:exported="false" />
+        <activity android:name=".notes.NotesActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".weather.WeatherSettingsActivity" android:exported="false" />
+        <activity android:name=".latency.LatencySettingsActivity" android:exported="false" />
         <activity
-            android:name=".launcher.AppDrawerActivity"
-            android:exported="false" />
+            android:name=".pomodoro.PomodoroAlertActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" />
+
+        <receiver android:name=".pomodoro.Pomodoro$Receiver" android:exported="false" />
     </application>
 </manifest>

@@ -8,11 +8,11 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
-import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.arashrasoulzadeh.einkdash.R
 import com.arashrasoulzadeh.einkdash.eink.Eink
+import com.arashrasoulzadeh.einkdash.util.Ui
 
 /** Paged app grid; no scrolling, since scrolling ghosts on e-ink. */
 class AppDrawerActivity : Activity() {
@@ -20,7 +20,7 @@ class AppDrawerActivity : Activity() {
     private val cols = 4
     private val rows = 5
     private lateinit var apps: List<ResolveInfo>
-    private lateinit var grid: GridLayout
+    private lateinit var grid: LinearLayout
     private lateinit var pageLabel: TextView
     private var page = 0
 
@@ -34,27 +34,17 @@ class AppDrawerActivity : Activity() {
             .filter { it.activityInfo.packageName != packageName }
             .sortedBy { it.loadLabel(pm).toString().lowercase() }
 
-        grid = GridLayout(this).apply { columnCount = cols; rowCount = rows }
-        pageLabel = TextView(this).apply { textSize = 20f; gravity = Gravity.CENTER }
+        // Nested LinearLayouts rather than GridLayout: weighted GridLayout specs need API 21.
+        grid = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        pageLabel = Ui.text(this, 16f, Ui.bold).apply { gravity = Gravity.CENTER }
 
-        val nav = LinearLayout(this).apply {
-            addView(navButton(R.string.prev) { flip(-1) }, LinearLayout.LayoutParams(0, 144, 1f))
-            addView(pageLabel, LinearLayout.LayoutParams(0, 144, 1f))
-            addView(navButton(R.string.next) { flip(1) }, LinearLayout.LayoutParams(0, 144, 1f))
-        }
-        setContentView(LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(16, 16, 16, 16)
-            // Keeps bars clear of system bars on edge-to-edge Android 15+.
-            fitsSystemWindows = true
-            addView(grid, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
-            addView(nav)
-        })
+        val root = Ui.screen(this, R.string.apps)
+        root.addView(grid, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+        root.addView(Ui.rule(this))
+        root.addView(Ui.gap(this, 6f))
+        root.addView(Ui.row(this, Ui.button(this, R.string.prev) { flip(-1) }, pageLabel, Ui.button(this, R.string.next) { flip(1) }))
         render()
     }
-
-    private fun navButton(text: Int, onClick: () -> Unit) =
-        Button(this).apply { setText(text); textSize = 24f; setOnClickListener { onClick() } }
 
     private fun flip(delta: Int) {
         val next = (page + delta).coerceIn(0, pageCount - 1)
@@ -65,18 +55,26 @@ class AppDrawerActivity : Activity() {
         grid.removeAllViews()
         val pm = packageManager
         val perPage = cols * rows
-        apps.drop(page * perPage).take(perPage).forEachIndexed { i, app ->
-            val cell = TextView(this).apply {
-                text = app.loadLabel(pm)
-                textSize = 16f
-                gravity = Gravity.CENTER
-                maxLines = 2
-                setCompoundDrawablesWithIntrinsicBounds(null, app.loadIcon(pm).toGrayscale(), null, null)
-                setOnClickListener { launch(app) }
+        val pageApps = apps.drop(page * perPage).take(perPage)
+        for (r in 0 until rows) {
+            val row = LinearLayout(this)
+            for (c in 0 until cols) {
+                val app = pageApps.getOrNull(r * cols + c)
+                val cell = TextView(this).apply {
+                    gravity = Gravity.CENTER
+                    if (app != null) {
+                        text = app.loadLabel(pm)
+                        textSize = 14f
+                        setTextColor(Ui.INK)
+                        maxLines = 2
+                        compoundDrawablePadding = Ui.dp(context, 6f)
+                        setCompoundDrawables(null, app.loadIcon(pm).toGrayscale(Ui.dp(context, 48f)), null, null)
+                        setOnClickListener { launch(app) }
+                    }
+                }
+                row.addView(cell, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f))
             }
-            grid.addView(cell, GridLayout.LayoutParams(
-                GridLayout.spec(i / cols, 1f), GridLayout.spec(i % cols, 1f)
-            ).apply { width = 0; height = 0 })
+            grid.addView(row, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
         }
         pageLabel.text = "${page + 1}/$pageCount"
         Eink.fullRefresh(window.decorView)
@@ -105,8 +103,9 @@ class AppDrawerActivity : Activity() {
     }
 }
 
-private fun android.graphics.drawable.Drawable.toGrayscale(): android.graphics.drawable.Drawable =
+/** Uniform-size grayscale icon; color icons are muddy on e-ink anyway. */
+private fun android.graphics.drawable.Drawable.toGrayscale(size: Int): android.graphics.drawable.Drawable =
     mutate().apply {
         colorFilter = android.graphics.ColorMatrixColorFilter(android.graphics.ColorMatrix().apply { setSaturation(0f) })
-        setBounds(0, 0, 96, 96)
+        setBounds(0, 0, size, size)
     }

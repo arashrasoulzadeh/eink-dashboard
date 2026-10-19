@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
@@ -18,6 +20,7 @@ import com.arashrasoulzadeh.einkdash.dashboard.DashboardLayout
 import com.arashrasoulzadeh.einkdash.dashboard.LayoutStore
 import com.arashrasoulzadeh.einkdash.dashboard.Placement
 import com.arashrasoulzadeh.einkdash.eink.Eink
+import com.arashrasoulzadeh.einkdash.util.Ui
 import com.arashrasoulzadeh.einkdash.widgets.WidgetRegistry
 
 class HomeActivity : Activity() {
@@ -30,6 +33,18 @@ class HomeActivity : Activity() {
     private lateinit var editBar: LinearLayout
     private var pageIndex = 0
     private var editing = false
+    private val handler = Handler(Looper.getMainLooper())
+
+    /** One ticker for every widget: aligned to the minute, faster only when a widget asks. */
+    private val tick = object : Runnable {
+        override fun run() {
+            grid.refreshWidgets()
+            Eink.fullRefresh(window.decorView)
+            val now = System.currentTimeMillis()
+            val delay = minOf(60_000 - now % 60_000, grid.nextDelayMs(now)).coerceAtLeast(250)
+            handler.postDelayed(this, delay)
+        }
+    }
 
     private val orientation get() = resources.configuration.orientation
     private val page get() = layout.pages[pageIndex]
@@ -45,7 +60,7 @@ class HomeActivity : Activity() {
             onLongPress = { if (!editing) setEditing(true) }
             onCellTap = ::onCellTap
         }
-        pageLabel = TextView(this).apply { textSize = 20f; gravity = Gravity.CENTER }
+        pageLabel = Ui.text(this, 16f, Ui.bold).apply { gravity = Gravity.CENTER }
 
         normalBar = bar(
             button(R.string.prev) { flip(-1) },
@@ -61,36 +76,63 @@ class HomeActivity : Activity() {
             addView(bar(
                 button(R.string.edit_add) { addWidget() },
                 button(R.string.edit_remove) { removeSelected() },
-                button(R.string.edit_wider) { resize(1, 0) },
-                button(R.string.edit_narrower) { resize(-1, 0) },
+                button(R.string.edit_setup) { setupSelected() },
+                button(R.string.edit_page) { pageMenu() },
             ))
             addView(bar(
+                button(R.string.edit_wider) { resize(1, 0) },
+                button(R.string.edit_narrower) { resize(-1, 0) },
                 button(R.string.edit_taller) { resize(0, 1) },
                 button(R.string.edit_shorter) { resize(0, -1) },
-                button(R.string.edit_page) { pageMenu() },
                 button(R.string.edit_done) { setEditing(false) },
             ))
             visibility = View.GONE
         }
 
-        setContentView(LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(16, 16, 16, 16)
-            // Keeps bars clear of system bars on edge-to-edge Android 15+.
+        val pad = Ui.dp(this, 12f)
+        // fitsSystemWindows on the outer frame keeps bars clear of system bars on edge-to-edge Android 15+.
+        setContentView(android.widget.FrameLayout(this).apply {
             fitsSystemWindows = true
-            addView(grid, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
-            addView(normalBar)
-            addView(editBar)
+            setBackgroundColor(Ui.PAPER)
+            addView(LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(pad, pad, pad, pad)
+                addView(grid, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+                addView(Ui.rule(context))
+                addView(normalBar)
+                addView(editBar)
+            })
         })
         showPage()
     }
 
-    private fun bar(vararg views: View) = LinearLayout(this).apply {
-        views.forEach { addView(it, LinearLayout.LayoutParams(0, (56 * resources.displayMetrics.density).toInt(), 1f)) }
+    override fun onResume() {
+        super.onResume()
+        // Settings screens may have changed widget data; rebuild and restart the ticker.
+        grid.rebuild()
+        handler.removeCallbacks(tick)
+        tick.run()
     }
 
-    private fun button(text: Int, onClick: () -> Unit) =
-        Button(this).apply { setText(text); textSize = 16f; setOnClickListener { onClick() } }
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(tick)
+    }
+
+    private fun setupSelected() {
+        val sel = selected ?: return toast(R.string.select_first)
+        if (WidgetRegistry.get(sel.type)?.configure(this) != true) toast(R.string.nothing_to_setup)
+    }
+
+    private fun bar(vararg views: View) = LinearLayout(this).apply {
+        val gap = Ui.dp(context, 6f)
+        setPadding(0, gap, 0, 0)
+        views.forEachIndexed { i, v ->
+            addView(v, LinearLayout.LayoutParams(0, Ui.dp(context, 52f), 1f).apply { if (i > 0) marginStart = gap })
+        }
+    }
+
+    private fun button(text: Int, onClick: () -> Unit) = Ui.button(this, text, onClick)
 
     private fun showPage() {
         grid.page = page
