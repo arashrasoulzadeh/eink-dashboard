@@ -67,7 +67,7 @@ abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(contex
 
     protected fun label(textRes: Int, extra: String? = null) {
         val base = context.getString(textRes)
-        title.text = (if (extra.isNullOrEmpty()) base else "$base · $extra").uppercase(resources.configuration.locale)
+        title.text = (if (extra.isNullOrEmpty()) base else base + Fa.sep(context) + extra).uppercase(resources.configuration.locale)
     }
 
     abstract fun refresh()

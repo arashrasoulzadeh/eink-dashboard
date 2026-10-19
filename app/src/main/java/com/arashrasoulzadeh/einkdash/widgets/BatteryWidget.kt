@@ -27,7 +27,7 @@ class BatteryWidget : DashboardWidget {
             val status = b?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
             val charging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
             val pct = if (level >= 0) "${level * 100 / scale}%" else "?"
-            battery.text = num(pct) + if (charging) " · " + context.getString(R.string.charging) else ""
+            battery.text = num(pct) + if (charging) com.arashrasoulzadeh.einkdash.util.Fa.sep(context) + context.getString(R.string.charging) else ""
 
             @Suppress("DEPRECATION")
             val net = (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo

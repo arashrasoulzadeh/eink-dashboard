@@ -28,7 +28,7 @@
     <string name="wifi_off">وای‌فای: خاموش</string>
     <string name="notes_hint">مورد جدید</string>
     <string name="notes_empty">موردی نیست. برای افزودن لمس کنید.</string>
-    <string name="notes_delete_hint">لمس برای تیک · نگه‌داشتن برای حذف</string>
+    <string name="notes_delete_hint">لمس برای تیک | نگه‌داشتن برای حذف</string>
     <string name="weather_city_hint">نام شهر</string>
     <string name="weather_current">مکان: %1$s</string>
     <string name="weather_none">تعیین نشده</string>

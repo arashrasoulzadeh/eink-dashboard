@@ -39,8 +39,8 @@ class ClockWidget : DashboardWidget {
             val locale = context.resources.configuration.locale
             time.text = num(SimpleDateFormat("HH:mm", Locale.US).format(now))
             val gregorian = SimpleDateFormat("EEEE d MMMM", locale).format(now)
-            date.text = if (Fa.isFa(context)) num("${j.day} ${Jalali.monthsFa[j.month - 1]} ${j.year}") + "   ·   " + gregorian
-            else gregorian + "   ·   " + "${j.day} ${Jalali.monthsEn[j.month - 1]} ${j.year}"
+            date.text = if (Fa.isFa(context)) num("${j.day} ${Jalali.monthsFa[j.month - 1]} ${j.year}") + "  " + Fa.sep(context) + "  " + gregorian
+            else gregorian + "  " + Fa.sep(context) + "  " + "${j.day} ${Jalali.monthsEn[j.month - 1]} ${j.year}"
             val minutes = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
             meter.progress = minutes / 1440f
             meterLabel.text = context.getString(R.string.clock_day_left, num(((1440 - minutes) / 60).toString()), num(((1440 - minutes) % 60).toString()))
