@@ -33,7 +33,7 @@ object Backup {
             prefs.put(name, o)
         }
         val notes = JSONArray()
-        NotesDb(ctx).all().reversed().forEach { notes.put(JSONObject().put("text", it.text).put("done", it.done)) }
+        NotesDb.of(ctx).all().reversed().forEach { notes.put(JSONObject().put("text", it.text).put("done", it.done).put("due", it.due)) }
         return JSONObject().put("app", "einkdash").put("version", VERSION).put("prefs", prefs).put("notes", notes).toString(2)
     }
 
@@ -58,12 +58,12 @@ object Backup {
             e.apply()
         }
         root.optJSONArray("notes")?.let { arr ->
-            val db = NotesDb(ctx)
+            val db = NotesDb.of(ctx)
             db.all().forEach { db.delete(it.id) }
             for (i in 0 until arr.length()) {
                 val n = arr.getJSONObject(i)
-                db.add(n.getString("text"))
-                if (n.optBoolean("done")) db.all().firstOrNull()?.let { db.setDone(it.id, true) }
+                val id = db.add(n.getString("text"), n.optInt("due"))
+                if (n.optBoolean("done")) db.setDone(id, true)
             }
         }
     }

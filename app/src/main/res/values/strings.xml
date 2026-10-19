@@ -137,4 +137,15 @@
     <string name="ctl_light">Light %1$s</string>
     <string name="screen_mode_on">Screen: always on</string>
     <string name="screen_mode_saver">Screen: battery saver</string>
+    <string name="due_none">No date</string>
+    <string name="due_today">today</string>
+    <string name="due_tomorrow">tomorrow</string>
+    <string name="due_overdue">overdue</string>
+    <string name="widget_quote">Quote of the day</string>
+    <string name="quote_source">Hafez, ghazal %1$s</string>
+    <string name="quote_tap">tap to save to notes</string>
+    <string name="quote_saved">Saved to notes</string>
+    <string name="widget_calendar">Calendar</string>
+    <string name="large_print">Large print: %1$s</string>
+    <string name="pomo_pick">Tap a circle to start</string>
 </resources>

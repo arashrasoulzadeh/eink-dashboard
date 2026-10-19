@@ -133,4 +133,15 @@
     <string name="ctl_light">نور %1$s</string>
     <string name="screen_mode_on">صفحه: همیشه روشن</string>
     <string name="screen_mode_saver">صفحه: صرفه‌جویی باتری</string>
+    <string name="due_none">بدون تاریخ</string>
+    <string name="due_today">امروز</string>
+    <string name="due_tomorrow">فردا</string>
+    <string name="due_overdue">عقب‌افتاده</string>
+    <string name="widget_quote">بیت روز</string>
+    <string name="quote_source">حافظ، غزل %1$s</string>
+    <string name="quote_tap">برای ذخیره در یادداشت‌ها لمس کنید</string>
+    <string name="quote_saved">در یادداشت‌ها ذخیره شد</string>
+    <string name="widget_calendar">تقویم</string>
+    <string name="large_print">متن درشت: %1$s</string>
+    <string name="pomo_pick">برای شروع یک دایره را لمس کنید</string>
 </resources>

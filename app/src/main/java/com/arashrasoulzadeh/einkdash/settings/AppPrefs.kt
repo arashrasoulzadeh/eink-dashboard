@@ -71,6 +71,11 @@ class AppPrefs(context: Context) {
         get() = prefs.getFloat("brightness", -1f)
         set(v) = prefs.edit().putFloat("brightness", v).apply()
 
+    /** Large print: bigger text and its own simpler layout of four large spots. */
+    var largePrint: Boolean
+        get() = prefs.getBoolean("largePrint", false)
+        set(v) = prefs.edit().putBoolean("largePrint", v).apply()
+
     companion object {
         val DIM_CHOICES = intArrayOf(0, 1, 2, 5, 10)
         val SUMMARY_CHOICES = intArrayOf(-1, 6, 7, 8, 9)

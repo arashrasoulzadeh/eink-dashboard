@@ -67,7 +67,7 @@ class ReadingWidget : DashboardWidget {
             } else {
                 val pm = context.packageManager
                 app.show(runCatching { pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)) }.getOrDefault(pkg))
-                hint.text = context.getString(R.string.reading_tap) + "  →"
+                hint.text = context.getString(R.string.reading_tap) + if (com.arashrasoulzadeh.einkdash.util.Fa.isFa(context)) "  ←" else "  →"
             }
         }
     }

@@ -150,7 +150,7 @@ class FaceActivity : BaseActivity() {
     }
 
     private fun notes(max: Int) {
-        val open = NotesDb(this).all().filter { !it.done }
+        val open = NotesDb.of(this).all().filter { !it.done }
         if (open.isEmpty()) body.addView(Ui.text(this, 18f).apply { setText(R.string.notes_none_short) })
         open.take(max).forEach { body.addView(Ui.text(this, 20f).apply { text = "☐  " + it.text; setPadding(0, Ui.dp(context, 4f), 0, 0) }) }
     }

@@ -139,6 +139,13 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
                 recreate()
             }
         }
+        // Large print: bigger text and its own four-spot layout.
+        val large = Ui.text(this, 17f, Ui.bold).apply {
+            text = "Aa"
+            gravity = Gravity.CENTER
+            if (appPrefs.largePrint) paintFlags = paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
+            setOnClickListener { appPrefs.largePrint = !appPrefs.largePrint; recreate() }
+        }
         val rotate = com.arashrasoulzadeh.einkdash.util.RotateIcon(this).apply {
             setOnClickListener { com.arashrasoulzadeh.einkdash.util.DeviceControls.rotate(this@HomeActivity) }
         }
@@ -147,6 +154,7 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
             addView(apps, LinearLayout.LayoutParams(0, h, 1f))
             addView(lang, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
             addView(rotate, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
+            addView(large, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
             addView(pageLabel, LinearLayout.LayoutParams(0, h, 0.5f))
             addView(status, LinearLayout.LayoutParams(0, h, 1.5f))
         }
@@ -189,6 +197,7 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
         super.onResume()
         if (appPrefs.language != startLanguage || com.arashrasoulzadeh.einkdash.face.Night.isNight(this) != startNight) { recreate(); return }
         com.arashrasoulzadeh.einkdash.notes.NoteServer.onNote = { grid.refreshWidgets(); Eink.fullRefresh(window.decorView) }
+        com.arashrasoulzadeh.einkdash.notes.NoteServer.onRestore = { recreate() }
         // A restored backup may have replaced the saved layout.
         layout = store.load(orientation)
         pageIndex = pageIndex.coerceAtMost(layout.pages.size - 1)

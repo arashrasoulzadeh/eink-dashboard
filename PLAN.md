@@ -74,6 +74,8 @@ A single scheduler ticks the widgets and batches all their view updates into one
 - [x] Quick settings widget (frontlight −/+, Wi-Fi, rotate, screen mode, Android settings); footer rotate button; saved brightness and orientation
 - [x] Battery saver default: sleep face goes up just before the system screen timeout, then the device sleeps (e-ink keeps the image); network widgets skip fetches when offline
   - Default layout v7 (portrait) / v8 (landscape: full-height clock column)
+- [x] Hafez couplet of the day (495 ghazal openings bundled from the hafez project; tap saves to notes), month calendar (Jalali/Gregorian, today circled, due-todo dots), dated todos (due column, today/overdue first), Wi-Fi backup download/restore on the note page, large-print mode (Aa; own 4-spot layout), pomodoro quick-start rings (1/5/15/25)
+  - Layout keys: layout9_* (normal) and large1_* (large print)
 - [x] Expand icon on every widget opens it full screen (own ticker); pomodoro shows mm:ss, per-second redraws are partial with a full e-ink refresh once a minute
 - [x] 5. Vazirmatn font (all text), in-app language switch (System/English/فارسی), always-on + frontlight off after idle (default 2 min), JSON backup export/import (system picker on 4.4+, Downloads file on 4.2/4.3), GitHub Actions build + tag releases, README
   - Verified on the API 36 emulator: Persian/RTL dashboard, edit mode and settings; backup export → import round trip

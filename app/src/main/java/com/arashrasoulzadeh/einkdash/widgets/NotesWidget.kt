@@ -31,7 +31,7 @@ class NotesWidget : DashboardWidget {
         }
 
         override fun refresh() {
-            val open = NotesDb(context).all().filter { !it.done }
+            val open = NotesDb.of(context).all().filter { !it.done }
             label(R.string.widget_notes, if (open.isEmpty()) null else num(open.size.toString()))
             val count = (lines.height / lineH).coerceAtLeast(1)
             lines.removeAllViews()
@@ -39,6 +39,8 @@ class NotesWidget : DashboardWidget {
                 val note = open.getOrNull(i)
                 val text = when {
                     note != null && i == count - 1 && open.size > count -> context.getString(R.string.notes_more, num((open.size - i).toString()))
+                    note != null && note.due != 0 -> (if (note.due <= NotesDb.today()) "◆   " else "☐   ") + note.text +
+                        com.arashrasoulzadeh.einkdash.util.Fa.sep(context) + NotesDb.dueLabel(context, note.due)
                     note != null -> "☐   " + note.text
                     i == 0 && open.isEmpty() -> context.getString(R.string.notes_empty)
                     else -> ""

@@ -64,6 +64,7 @@ class SettingsActivity : BaseActivity() {
         toggle({ if (prefs.dimAfterMin == 0) getString(R.string.dim_never) else getString(R.string.dim_after, prefs.dimAfterMin) }) {
             prefs.dimAfterMin = next<Int>(AppPrefs.DIM_CHOICES, prefs.dimAfterMin)
         }
+        toggle({ getString(R.string.large_print, onOff(prefs.largePrint)) }) { prefs.largePrint = !prefs.largePrint; recreate() }
         toggle({ getString(R.string.sleep_face, onOff(prefs.sleepFace)) }) { prefs.sleepFace = !prefs.sleepFace }
         note { getString(R.string.sleep_face_help) }
 

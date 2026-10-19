@@ -24,10 +24,13 @@ open class BaseActivity : Activity() {
     }
 
     companion object {
+        const val LARGE_PRINT_SCALE = 1.35f
+
         fun wrap(base: Context): Context {
             val lang = AppPrefs(base).language
             val night = com.arashrasoulzadeh.einkdash.face.Night.isNight(base)
-            if (lang == "system" && !night) return base
+            val large = AppPrefs(base).largePrint
+            if (lang == "system" && !night && !large) return base
             val config = Configuration(base.resources.configuration)
             if (lang != "system") {
                 val locale = Locale(lang)
@@ -37,6 +40,7 @@ open class BaseActivity : Activity() {
             }
             // Night theme: larger text, readable from across the room.
             if (night) config.fontScale = config.fontScale * com.arashrasoulzadeh.einkdash.face.Night.FONT_SCALE
+            if (large) config.fontScale = config.fontScale * LARGE_PRINT_SCALE
             return base.createConfigurationContext(config)
         }
     }

@@ -33,10 +33,13 @@ object Pomodoro {
         nm.setInterruptionFilter(if (on) android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY else android.app.NotificationManager.INTERRUPTION_FILTER_ALL)
     }
 
-    fun start(ctx: Context, phase: String) {
-        val minutes = if (phase == WORK) workMin(ctx) else breakMin(ctx)
+    /** Length of the running session in minutes (quick starts can differ from the configured length). */
+    fun sessionMin(ctx: Context) = prefs(ctx).getInt("sessionMin", workMin(ctx))
+
+    fun start(ctx: Context, phase: String, minutesOverride: Int = 0) {
+        val minutes = if (minutesOverride > 0) minutesOverride else if (phase == WORK) workMin(ctx) else breakMin(ctx)
         val end = System.currentTimeMillis() + minutes * 60_000L
-        prefs(ctx).edit().putLong("endAt", end).putString("phase", phase).apply()
+        prefs(ctx).edit().putLong("endAt", end).putString("phase", phase).putInt("sessionMin", minutes).apply()
         if (phase == WORK) {
             setDndOn(ctx, true)
             if (openReader(ctx)) com.arashrasoulzadeh.einkdash.widgets.ReadingWidget.launchReader(ctx)
@@ -63,7 +66,7 @@ object Pomodoro {
         val phase = phase(ctx)
         stop(ctx)
         // Finished focus sessions count as reading time when reading focus is on.
-        if (phase == WORK && openReader(ctx)) com.arashrasoulzadeh.einkdash.reading.ReadingStats(ctx).add(workMin(ctx))
+        if (phase == WORK && openReader(ctx)) com.arashrasoulzadeh.einkdash.reading.ReadingStats(ctx).add(sessionMin(ctx))
         ctx.startActivity(Intent(ctx, PomodoroAlertActivity::class.java)
             .putExtra("phase", phase)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

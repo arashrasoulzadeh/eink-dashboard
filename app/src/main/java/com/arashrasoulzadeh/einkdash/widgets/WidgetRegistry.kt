@@ -11,6 +11,8 @@ object WidgetRegistry {
         PomodoroWidget(),
         ReadingStatsWidget(),
         ControlsWidget(),
+        CalendarWidget(),
+        QuoteWidget(),
     )
 
     private val byType = all.associateBy { it.type }
