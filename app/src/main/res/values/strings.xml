@@ -97,4 +97,32 @@
     <string name="pomo_unit_min_sec">min : sec</string>
     <string name="empty" translatable="false"></string>
     <string name="close">Close</string>
+    <string name="settings_home">Home screen</string>
+    <string name="home_set_default">Set Eink Dash as default home app</string>
+    <string name="home_is_default">✓ Eink Dash is the default home app</string>
+    <string name="sleep_face">Sleep face when idle: %1$s</string>
+    <string name="sleep_face_help">When the frontlight goes off, a calm page with the clock, notes and weather stays on the e-ink screen.</string>
+    <string name="settings_morning">Morning summary</string>
+    <string name="summary_off">Morning summary: off</string>
+    <string name="summary_at">Morning summary at %1$s</string>
+    <string name="settings_night">Night</string>
+    <string name="night_off">Night theme: off</string>
+    <string name="night_from">Night theme %1$s – %2$s</string>
+    <string name="night_clock">Giant clock while charging at night: %1$s</string>
+    <string name="night_help">At night text is larger and the frontlight very dim.</string>
+    <string name="settings_phone_notes">Notes from phone or PC</string>
+    <string name="note_server">Note page on Wi-Fi: %1$s</string>
+    <string name="note_server_help">Turn on, then open the address shown here in any browser on the same Wi-Fi to add notes.</string>
+    <string name="note_server_open">Open %1$s in a browser on the same Wi-Fi. PIN: %2$s</string>
+    <string name="note_server_no_wifi">Connect to Wi-Fi to use the note page.</string>
+    <string name="face_tap">Tap anywhere to return</string>
+    <string name="summary_title">Good morning</string>
+    <string name="summary_todos">Top todos</string>
+    <string name="summary_all_up">All endpoints up</string>
+    <string name="notes_none_short">Nothing open</string>
+    <string name="widget_reading_stats">Reading</string>
+    <string name="stats_day_streak">day streak</string>
+    <string name="stats_today">%1$s min today</string>
+    <string name="pomo_open_reader">Open reader app on focus (reading mode)</string>
+    <string name="pomo_dnd">Do Not Disturb during focus</string>
 </resources>

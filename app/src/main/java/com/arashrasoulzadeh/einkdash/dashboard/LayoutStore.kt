@@ -19,17 +19,17 @@ class LayoutStore(context: Context) {
         prefs.edit().putString(key(orientation == Configuration.ORIENTATION_LANDSCAPE), layout.toJson()).apply()
     }
 
-    // v5: stacked spots, notes first; bumping the key moves existing installs onto them.
-    private fun key(landscape: Boolean) = if (landscape) "layout5_landscape" else "layout5_portrait"
+    // v6: stacked spots, notes first, reading stats; bumping the key moves existing installs onto them.
+    private fun key(landscape: Boolean) = if (landscape) "layout6_landscape" else "layout6_portrait"
 
     /** First run: one page; spots below the clock are stacks you swipe through. */
     private fun defaultLayout(landscape: Boolean, cols: Int, rows: Int): DashboardLayout {
         val spots = if (landscape) listOf(
             listOf("clock") to intArrayOf(0, 0, 3, 2), listOf("notes", "latency") to intArrayOf(3, 0, 3, 2),
-            listOf("weather", "reading") to intArrayOf(0, 2, 3, 2), listOf("pomodoro", "battery") to intArrayOf(3, 2, 3, 2),
+            listOf("weather", "readingStats", "reading") to intArrayOf(0, 2, 3, 2), listOf("pomodoro", "battery") to intArrayOf(3, 2, 3, 2),
         ) else listOf(
             listOf("clock") to intArrayOf(0, 0, 4, 2), listOf("notes", "latency") to intArrayOf(0, 2, 4, 2),
-            listOf("weather", "reading") to intArrayOf(0, 4, 2, 2), listOf("pomodoro", "battery") to intArrayOf(2, 4, 2, 2),
+            listOf("weather", "readingStats", "reading") to intArrayOf(0, 4, 2, 2), listOf("pomodoro", "battery") to intArrayOf(2, 4, 2, 2),
         )
         val page = Page(cols, rows)
         spots.forEachIndexed { i, (stack, g) -> page.tryUpdate(Placement(i + 1L, stack, g[0], g[1], g[2], g[3])) }

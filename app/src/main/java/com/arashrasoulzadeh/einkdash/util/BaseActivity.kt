@@ -21,12 +21,17 @@ open class BaseActivity : Activity() {
     companion object {
         fun wrap(base: Context): Context {
             val lang = AppPrefs(base).language
-            if (lang == "system") return base
-            val locale = Locale(lang)
-            Locale.setDefault(locale)
+            val night = com.arashrasoulzadeh.einkdash.face.Night.isNight(base)
+            if (lang == "system" && !night) return base
             val config = Configuration(base.resources.configuration)
-            config.setLocale(locale)
-            config.setLayoutDirection(locale)
+            if (lang != "system") {
+                val locale = Locale(lang)
+                Locale.setDefault(locale)
+                config.setLocale(locale)
+                config.setLayoutDirection(locale)
+            }
+            // Night theme: larger text, readable from across the room.
+            if (night) config.fontScale = config.fontScale * com.arashrasoulzadeh.einkdash.face.Night.FONT_SCALE
             return base.createConfigurationContext(config)
         }
     }

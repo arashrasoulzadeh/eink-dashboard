@@ -18,11 +18,21 @@ class ReadingWidget : DashboardWidget {
     override val defaultW = 4
     override val defaultH = 2
 
-    private fun prefs(ctx: Context) = ctx.applicationContext.getSharedPreferences("reading", Context.MODE_PRIVATE)
+    companion object {
+        private fun prefs(ctx: Context) = ctx.applicationContext.getSharedPreferences("reading", Context.MODE_PRIVATE)
 
-    private fun readerPackage(ctx: Context): String? {
-        prefs(ctx).getString("pkg", null)?.let { if (launchIntent(ctx, it) != null) return it }
-        return launcherApps(ctx).firstOrNull { "fidibo" in it.first.lowercase() }?.first
+        fun readerPackage(ctx: Context): String? {
+            prefs(ctx).getString("pkg", null)?.let { if (ctx.packageManager.getLaunchIntentForPackage(it) != null) return it }
+            return ctx.packageManager.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
+                .map { it.activityInfo.packageName }.firstOrNull { "fidibo" in it.lowercase() }
+        }
+
+        /** Opens the chosen reader; returns false when none is set up. */
+        fun launchReader(ctx: Context): Boolean {
+            val intent = readerPackage(ctx)?.let { ctx.packageManager.getLaunchIntentForPackage(it) } ?: return false
+            ctx.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            return true
+        }
     }
 
     private fun launchIntent(ctx: Context, pkg: String) = ctx.packageManager.getLaunchIntentForPackage(pkg)

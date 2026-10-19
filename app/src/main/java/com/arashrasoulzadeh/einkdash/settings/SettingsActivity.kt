@@ -6,48 +6,90 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
 import com.arashrasoulzadeh.einkdash.R
 import com.arashrasoulzadeh.einkdash.eink.Eink
+import com.arashrasoulzadeh.einkdash.notes.NoteServer
 import com.arashrasoulzadeh.einkdash.util.BaseActivity
+import com.arashrasoulzadeh.einkdash.util.Fa
 import com.arashrasoulzadeh.einkdash.util.Ui
 import java.io.File
 
 class SettingsActivity : BaseActivity() {
 
     private lateinit var prefs: AppPrefs
-    private lateinit var keepOn: Button
-    private lateinit var dim: Button
+    private val renders = mutableListOf<() -> Unit>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = AppPrefs(this)
-        val root = Ui.screen(this, R.string.settings)
+        val screen = Ui.screen(this, R.string.settings)
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        screen.addView(ScrollView(this).apply { addView(root) }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
 
-        root.addView(Ui.label(this, R.string.settings_language))
-        root.addView(Ui.gap(this, 8f))
+        fun section(title: Int) { root.addView(Ui.gap(this, 20f)); root.addView(Ui.label(this, title)); root.addView(Ui.gap(this, 8f)) }
+        fun toggle(text: () -> String, onClick: () -> Unit): Button {
+            val b = Ui.button(this, "") { onClick(); render() }
+            renders += { b.text = text() }
+            root.addView(b); root.addView(Ui.gap(this, 8f))
+            return b
+        }
+        fun note(text: () -> String) {
+            val t = Ui.text(this, 13f)
+            renders += { t.text = text() }
+            root.addView(t); root.addView(Ui.gap(this, 4f))
+        }
+        fun onOff(on: Boolean) = getString(if (on) R.string.on else R.string.off)
+        fun hour(h: Int) = Fa.digits(this, "%02d:00".format(h))
+        fun <T> next(choices: IntArray, cur: Int) = choices[(choices.indexOf(cur) + 1) % choices.size]
+
+        section(R.string.settings_home)
+        toggle({ getString(if (DefaultHome.isDefault(this)) R.string.home_is_default else R.string.home_set_default) }) {
+            if (!DefaultHome.isDefault(this)) DefaultHome.request(this)
+        }
+
+        section(R.string.settings_language)
         root.addView(Ui.row(this,
             Ui.button(this, R.string.lang_system) { setLanguage("system") },
             Ui.button(this, "English") { setLanguage("en") },
             Ui.button(this, "فارسی") { setLanguage("fa") },
         ))
 
-        root.addView(Ui.gap(this, 24f))
-        root.addView(Ui.label(this, R.string.settings_display))
-        root.addView(Ui.gap(this, 8f))
-        keepOn = Ui.button(this, "") { prefs.keepScreenOn = !prefs.keepScreenOn; render() }
-        dim = Ui.button(this, "") {
-            val c = AppPrefs.DIM_CHOICES
-            prefs.dimAfterMin = c[(c.indexOf(prefs.dimAfterMin) + 1) % c.size]
-            render()
+        section(R.string.settings_display)
+        toggle({ getString(R.string.keep_screen_on, onOff(prefs.keepScreenOn)) }) { prefs.keepScreenOn = !prefs.keepScreenOn }
+        toggle({ if (prefs.dimAfterMin == 0) getString(R.string.dim_never) else getString(R.string.dim_after, prefs.dimAfterMin) }) {
+            prefs.dimAfterMin = next<Int>(AppPrefs.DIM_CHOICES, prefs.dimAfterMin)
         }
-        root.addView(keepOn)
-        root.addView(Ui.gap(this, 8f))
-        root.addView(dim)
+        toggle({ getString(R.string.sleep_face, onOff(prefs.sleepFace)) }) { prefs.sleepFace = !prefs.sleepFace }
+        note { getString(R.string.sleep_face_help) }
 
-        root.addView(Ui.gap(this, 24f))
-        root.addView(Ui.label(this, R.string.settings_backup))
-        root.addView(Ui.gap(this, 8f))
+        section(R.string.settings_morning)
+        toggle({ if (prefs.summaryHour < 0) getString(R.string.summary_off) else getString(R.string.summary_at, hour(prefs.summaryHour)) }) {
+            prefs.summaryHour = next<Int>(AppPrefs.SUMMARY_CHOICES, prefs.summaryHour)
+        }
+
+        section(R.string.settings_night)
+        toggle({ if (prefs.nightStart < 0) getString(R.string.night_off) else getString(R.string.night_from, hour(prefs.nightStart), hour(prefs.nightEnd)) }) {
+            prefs.nightStart = next<Int>(AppPrefs.NIGHT_CHOICES, prefs.nightStart)
+        }
+        toggle({ getString(R.string.night_clock, onOff(prefs.nightClock)) }) { prefs.nightClock = !prefs.nightClock }
+        note { getString(R.string.night_help) }
+
+        section(R.string.settings_phone_notes)
+        toggle({ getString(R.string.note_server, onOff(prefs.noteServer)) }) {
+            prefs.noteServer = !prefs.noteServer
+            NoteServer.sync(this)
+        }
+        note {
+            if (!prefs.noteServer) getString(R.string.note_server_help)
+            else NoteServer.address(this)?.let { getString(R.string.note_server_open, it, Fa.digits(this, prefs.noteServerPin)) }
+                ?: getString(R.string.note_server_no_wifi)
+        }
+
+        section(R.string.settings_backup)
         root.addView(Ui.row(this,
             Ui.button(this, R.string.backup_export) { export() },
             Ui.button(this, R.string.backup_import) { import() },
@@ -57,9 +99,13 @@ class SettingsActivity : BaseActivity() {
         render()
     }
 
+    override fun onResume() {
+        super.onResume()
+        render() // default-home state may have changed in the system dialog
+    }
+
     private fun render() {
-        keepOn.text = getString(R.string.keep_screen_on, getString(if (prefs.keepScreenOn) R.string.on else R.string.off))
-        dim.text = if (prefs.dimAfterMin == 0) getString(R.string.dim_never) else getString(R.string.dim_after, prefs.dimAfterMin)
+        renders.forEach { it() }
         Eink.fullRefresh(window.decorView)
     }
 

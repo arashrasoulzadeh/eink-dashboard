@@ -43,8 +43,17 @@ class HomeActivity : BaseActivity() {
     private lateinit var appPrefs: AppPrefs
     private var startLanguage = ""
 
-    /** Always-on display: frontlight off after a quiet spell; any touch brings it back. */
-    private val dimNow = Runnable { setBrightness(0f) }
+    /** Always-on display: after a quiet spell the frontlight goes off and the sleep face takes over. */
+    private val dimNow = Runnable {
+        setBrightness(0f)
+        if (appPrefs.sleepFace) com.arashrasoulzadeh.einkdash.face.FaceActivity.show(this, com.arashrasoulzadeh.einkdash.face.FaceActivity.SLEEP)
+    }
+    private var startNight = false
+
+    /** Morning summary once a day, giant clock while charging at night. */
+    private fun timeOfDay() {
+        com.arashrasoulzadeh.einkdash.face.Night.dueFace(this)?.let { com.arashrasoulzadeh.einkdash.face.FaceActivity.show(this, it) }
+    }
 
     private fun setBrightness(value: Float) {
         window.attributes = window.attributes.apply { screenBrightness = value }
@@ -53,6 +62,7 @@ class HomeActivity : BaseActivity() {
     private fun scheduleDim() {
         handler.removeCallbacks(dimNow)
         setBrightness(WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
+        if (com.arashrasoulzadeh.einkdash.face.Night.isNight(this)) setBrightness(com.arashrasoulzadeh.einkdash.face.Night.BRIGHTNESS)
         val min = appPrefs.dimAfterMin
         if (min > 0) handler.postDelayed(dimNow, min * 60_000L)
     }
@@ -65,8 +75,11 @@ class HomeActivity : BaseActivity() {
     /** One ticker for every widget: aligned to the minute, faster only when a widget asks. */
     private val tick = object : Runnable {
         override fun run() {
+            // Crossing into or out of the night window changes text size, which needs a fresh activity.
+            if (com.arashrasoulzadeh.einkdash.face.Night.isNight(this@HomeActivity) != startNight) { recreate(); return }
             grid.refreshWidgets()
             updateStatus()
+            timeOfDay()
             val now = System.currentTimeMillis()
             // Seconds-level ticks (running pomodoro) redraw partially; the anti-ghosting flash runs once a minute.
             if (now % 60_000 < 1_500 || now - lastFull > 60_000) { Eink.fullRefresh(window.decorView); lastFull = now }
@@ -83,6 +96,7 @@ class HomeActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         appPrefs = AppPrefs(this)
         startLanguage = appPrefs.language
+        startNight = com.arashrasoulzadeh.einkdash.face.Night.isNight(this)
         store = LayoutStore(this)
         layout = store.load(orientation)
 
@@ -162,7 +176,8 @@ class HomeActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (appPrefs.language != startLanguage) { recreate(); return }
+        if (appPrefs.language != startLanguage || com.arashrasoulzadeh.einkdash.face.Night.isNight(this) != startNight) { recreate(); return }
+        com.arashrasoulzadeh.einkdash.notes.NoteServer.onNote = { grid.refreshWidgets(); Eink.fullRefresh(window.decorView) }
         // A restored backup may have replaced the saved layout.
         layout = store.load(orientation)
         pageIndex = pageIndex.coerceAtMost(layout.pages.size - 1)

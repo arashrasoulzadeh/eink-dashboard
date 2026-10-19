@@ -7,5 +7,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         Ui.init(this)
+        com.arashrasoulzadeh.einkdash.notes.NoteServer.sync(this)
     }
 }

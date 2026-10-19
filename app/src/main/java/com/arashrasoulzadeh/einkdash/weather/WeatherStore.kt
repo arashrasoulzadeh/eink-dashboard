@@ -58,6 +58,18 @@ class WeatherStore(context: Context) {
         return loc.latitude to loc.longitude
     }
 
+    class Now(val temp: Int, val codeLabel: Int, val hi: Int, val lo: Int)
+
+    /** Current conditions from the cache, or null when nothing has been fetched. */
+    fun now(): Now? = runCatching {
+        val o = JSONObject(cache!!)
+        val cur = o.getJSONObject("current")
+        val d = o.getJSONObject("daily")
+        Now(Math.round(cur.getDouble("temperature_2m")).toInt(), WeatherCodes.label(cur.getInt("weather_code")),
+            Math.round(d.getJSONArray("temperature_2m_max").getDouble(0)).toInt(),
+            Math.round(d.getJSONArray("temperature_2m_min").getDouble(0)).toInt())
+    }.getOrNull()
+
     companion object {
         class Place(val label: String, val lat: Double, val lon: Double)
 

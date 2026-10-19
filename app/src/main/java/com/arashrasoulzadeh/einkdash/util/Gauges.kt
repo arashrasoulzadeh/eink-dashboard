@@ -58,7 +58,7 @@ private fun ink(ctx: Context, strokeDp: Float, fill: Boolean = false) = Paint(Pa
 class Spark(context: Context) : View(context) {
     var values: List<Int> = emptyList()
         set(v) { field = v; invalidate() }
-    private val slots = 10
+    var slots = 10
     private val bar = ink(context, 0f, fill = true)
     private val line = ink(context, 1f)
     private val cross = ink(context, 1.5f)
@@ -68,7 +68,7 @@ class Spark(context: Context) : View(context) {
         if (w <= 0 || h <= 0) return
         canvas.drawLine(0f, h - 0.5f, w, h - 0.5f, line)
         val max = (values.filter { it >= 0 }.maxOrNull() ?: 1).coerceAtLeast(1)
-        val slot = w / slots
+        val slot = w / maxOf(slots, values.size)
         val bw = slot * 0.62f
         val start = slots - values.size
         values.forEachIndexed { i, v ->

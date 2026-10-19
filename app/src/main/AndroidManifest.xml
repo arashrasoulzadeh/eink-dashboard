@@ -3,6 +3,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
@@ -43,6 +45,18 @@
 
         <activity android:name=".launcher.AppDrawerActivity" android:exported="false" />
         <activity android:name=".launcher.FullscreenActivity" android:exported="false" />
+        <activity android:name=".face.FaceActivity" android:exported="false" android:launchMode="singleTop" android:excludeFromRecents="true" />
+        <!-- Disabled placeholder; briefly enabled on Android 4.x to reset the default launcher choice. -->
+        <activity
+            android:name=".settings.DefaultHome$FakeHome"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".notes.NotesActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".weather.WeatherSettingsActivity" android:exported="false" />
         <activity android:name=".latency.LatencySettingsActivity" android:exported="false" />

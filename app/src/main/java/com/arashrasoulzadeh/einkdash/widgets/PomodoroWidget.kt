@@ -58,10 +58,26 @@ class PomodoroWidget : DashboardWidget {
 
     override fun configure(activity: Activity): Boolean {
         val options = intArrayOf(15, 25, 45, 50)
+        fun mark(on: Boolean) = if (on) "☑  " else "☐  "
+        val items = options.map { (if (it == Pomodoro.workMin(activity)) "●  " else "○  ") + activity.getString(R.string.pomo_minutes, it) } +
+            (mark(Pomodoro.openReader(activity)) + activity.getString(R.string.pomo_open_reader)) +
+            (mark(Pomodoro.dnd(activity)) + activity.getString(R.string.pomo_dnd))
         AlertDialog.Builder(activity)
             .setTitle(R.string.pomo_length)
-            .setItems(options.map { activity.getString(R.string.pomo_minutes, it) }.toTypedArray()) { _, i ->
-                Pomodoro.setWorkMin(activity, options[i])
+            .setItems(items.toTypedArray()) { _, i ->
+                when {
+                    i < options.size -> Pomodoro.setWorkMin(activity, options[i])
+                    i == options.size -> Pomodoro.setOpenReader(activity, !Pomodoro.openReader(activity))
+                    else -> {
+                        val on = !Pomodoro.dnd(activity)
+                        Pomodoro.setDnd(activity, on)
+                        if (on && android.os.Build.VERSION.SDK_INT >= 23) {
+                            val nm = activity.getSystemService(android.app.NotificationManager::class.java)
+                            if (!nm.isNotificationPolicyAccessGranted)
+                                activity.startActivity(android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+                        }
+                    }
+                }
             }
             .show()
         return true

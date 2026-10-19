@@ -9,6 +9,7 @@ object WidgetRegistry {
         ReadingWidget(),
         NotesWidget(),
         PomodoroWidget(),
+        ReadingStatsWidget(),
     )
 
     private val byType = all.associateBy { it.type }
