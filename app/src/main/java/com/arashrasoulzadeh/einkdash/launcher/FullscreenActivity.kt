@@ -15,7 +15,7 @@ import com.arashrasoulzadeh.einkdash.widgets.WidgetRegistry
 import com.arashrasoulzadeh.einkdash.widgets.WidgetView
 
 /** One widget across the whole screen, with its own ticker. Back or Close returns home. */
-class FullscreenActivity : BaseActivity() {
+class FullscreenActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.WidgetHost {
 
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var widget: WidgetView
@@ -25,7 +25,7 @@ class FullscreenActivity : BaseActivity() {
         override fun run() {
             widget.refresh()
             val now = System.currentTimeMillis()
-            if (now % 60_000 < 1_500 || now - lastFull > 60_000) { Eink.fullRefresh(window.decorView); lastFull = now }
+            if (now - lastFull > 59_000 || (now % 60_000 < 1_500 && now - lastFull > 5_000)) { Eink.fullRefresh(window.decorView); lastFull = now }
             handler.postDelayed(this, minOf(60_000 - now % 60_000, widget.nextDelayMs(now)).coerceAtLeast(250))
         }
     }
@@ -54,6 +54,11 @@ class FullscreenActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         if (::widget.isInitialized) { handler.removeCallbacks(tick); tick.run() }
+    }
+
+    override fun retick() {
+        handler.removeCallbacks(tick)
+        handler.post(tick)
     }
 
     override fun onPause() {

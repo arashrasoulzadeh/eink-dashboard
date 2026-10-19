@@ -23,6 +23,8 @@ class PomodoroWidget : DashboardWidget {
             setOnClickListener {
                 if (Pomodoro.endAt(context) == 0L) Pomodoro.start(context, Pomodoro.WORK) else Pomodoro.stop(context)
                 refresh(); Eink.fullRefresh(rootView)
+                // Without this the host keeps its once-a-minute schedule and the countdown looks frozen.
+                retick()
             }
         }
 

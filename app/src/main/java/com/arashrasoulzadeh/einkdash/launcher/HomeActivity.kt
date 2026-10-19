@@ -27,7 +27,7 @@ import com.arashrasoulzadeh.einkdash.settings.SettingsActivity
 import android.view.MotionEvent
 import com.arashrasoulzadeh.einkdash.widgets.WidgetRegistry
 
-class HomeActivity : BaseActivity() {
+class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.WidgetHost {
 
     private lateinit var store: LayoutStore
     private lateinit var layout: DashboardLayout
@@ -83,12 +83,13 @@ class HomeActivity : BaseActivity() {
         override fun run() {
             // Crossing into or out of the night window changes text size, which needs a fresh activity.
             if (com.arashrasoulzadeh.einkdash.face.Night.isNight(this@HomeActivity) != startNight) { recreate(); return }
-            grid.refreshWidgets()
-            updateStatus()
-            timeOfDay()
             val now = System.currentTimeMillis()
+            val minuteTick = now - lastFull > 59_000 || (now % 60_000 < 1_500 && now - lastFull > 5_000)
+            // Between minutes only the fast widgets redraw; everything else (and the network checks) waits for the minute.
+            grid.refreshWidgets(onlyFast = !minuteTick, now = now)
+            if (minuteTick) { updateStatus(); timeOfDay() }
             // Seconds-level ticks (running pomodoro) redraw partially; the anti-ghosting flash runs once a minute.
-            if (now % 60_000 < 1_500 || now - lastFull > 60_000) { Eink.fullRefresh(window.decorView); lastFull = now }
+            if (minuteTick) { Eink.fullRefresh(window.decorView); lastFull = now }
             val delay = minOf(60_000 - now % 60_000, grid.nextDelayMs(now)).coerceAtLeast(250)
             handler.postDelayed(this, delay)
         }
@@ -205,6 +206,11 @@ class HomeActivity : BaseActivity() {
         super.onPause()
         handler.removeCallbacks(tick)
         handler.removeCallbacks(dimNow)
+    }
+
+    override fun retick() {
+        handler.removeCallbacks(tick)
+        handler.post(tick)
     }
 
     private fun updateStatus() {

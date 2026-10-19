@@ -100,8 +100,12 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
         }
     }
 
-    fun refreshWidgets() {
-        for (i in 0 until childCount) (getChildAt(i) as? WidgetView)?.refresh()
+    /** [onlyFast]: refresh just the widgets that asked for sub-minute updates (e.g. a running pomodoro). */
+    fun refreshWidgets(onlyFast: Boolean = false, now: Long = System.currentTimeMillis()) {
+        for (i in 0 until childCount) {
+            val w = getChildAt(i) as? WidgetView ?: continue
+            if (!onlyFast || w.nextDelayMs(now) < 60_000) w.refresh()
+        }
     }
 
     fun nextDelayMs(now: Long): Long =

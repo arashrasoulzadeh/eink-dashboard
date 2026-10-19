@@ -14,6 +14,12 @@ import com.arashrasoulzadeh.einkdash.util.ExpandIcon
 import com.arashrasoulzadeh.einkdash.util.Fa
 import com.arashrasoulzadeh.einkdash.util.Ui
 
+/** Screens that host widgets and run the refresh ticker. */
+interface WidgetHost {
+    /** Re-run the ticker now, e.g. after a widget switches to per-second updates. */
+    fun retick()
+}
+
 /**
  * Base view for widgets: a small uppercase section label, then content.
  * The home screen calls [refresh] on its ticker and then does one full e-ink refresh.
@@ -37,9 +43,12 @@ abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(contex
         orientation = VERTICAL
         val pad = (12 * dp).toInt()
         setPadding(pad, (6 * dp).toInt(), (6 * dp).toInt(), pad)
-        val icon = (36 * dp).toInt()
+        val icon = (44 * dp).toInt()
         addView(LinearLayout(context).apply {
             gravity = Gravity.CENTER_VERTICAL
+            // The header is its own touch target: a tap near ⛶ or the title never reaches the widget
+            // (which, for the pomodoro, would start or stop the timer).
+            isClickable = true
             addView(title, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
             addView(expand, LayoutParams(icon, icon))
         })
@@ -74,6 +83,9 @@ abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(contex
 
     /** How soon this widget needs its next refresh; the home ticker also fires every minute. */
     open fun nextDelayMs(now: Long): Long = Long.MAX_VALUE
+
+    /** Ask the hosting screen to reschedule its ticker (picks up a new [nextDelayMs] right away). */
+    protected fun retick() { (context as? WidgetHost)?.retick() }
 
     /** For results that arrive between ticks (network). */
     protected fun changed() {
