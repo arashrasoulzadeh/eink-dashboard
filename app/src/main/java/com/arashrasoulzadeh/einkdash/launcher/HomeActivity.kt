@@ -108,11 +108,22 @@ class HomeActivity : BaseActivity() {
                 overridePendingTransition(0, 0)
             }
         }
+        // One-tap language switch: shows the language you'd switch to.
+        val lang = Ui.text(this, 15f, Ui.bold).apply {
+            val fa = com.arashrasoulzadeh.einkdash.util.Fa.isFa(this@HomeActivity)
+            text = if (fa) "EN" else "فا"
+            gravity = Gravity.CENTER
+            setOnClickListener {
+                appPrefs.language = if (fa) "en" else "fa"
+                recreate()
+            }
+        }
         normalBar = LinearLayout(this).apply {
             val h = Ui.dp(context, 48f)
             addView(apps, LinearLayout.LayoutParams(0, h, 1f))
-            addView(pageLabel, LinearLayout.LayoutParams(0, h, 1f))
-            addView(status, LinearLayout.LayoutParams(0, h, 1f))
+            addView(lang, LinearLayout.LayoutParams(Ui.dp(context, 56f), h))
+            addView(pageLabel, LinearLayout.LayoutParams(0, h, 0.5f))
+            addView(status, LinearLayout.LayoutParams(0, h, 1.5f))
         }
         editBar = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL

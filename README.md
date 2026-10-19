@@ -25,11 +25,12 @@ Then press Home and choose Eink Dash as the default launcher.
 
 - **Long-press** the dashboard to edit: Add, Remove, Setup (widget settings), More (pages, Settings), W±/H± to resize, Done
 - **Page-turn or volume keys** flip pages
+- **FA / EN** in the footer switches language in one tap
 - **Settings** (Edit → More): language, keep screen on, frontlight timeout, backup
 
 ## Release
 
-Push a tag like `v0.2.0`. CI builds, tests and lints, then attaches the APK to a GitHub release.
+Two workflows run on every push and pull request: **Tests** (unit tests + lint, reports uploaded) and **Debug build** (debug APK uploaded as an artifact; can also be started by hand). Push a tag like `v0.2.0` and the debug build attaches the APK to a GitHub release.
 The release APK is debug-signed, which is fine for sideloading; add a signing config before distributing more widely.
 
 Font: [Vazirmatn](https://github.com/rastikerdar/vazirmatn), SIL Open Font License 1.1 (`app/src/main/assets/fonts/OFL.txt`).
