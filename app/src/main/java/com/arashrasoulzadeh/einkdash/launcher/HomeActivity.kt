@@ -61,10 +61,16 @@ class HomeActivity : BaseActivity() {
 
     private fun scheduleDim() {
         handler.removeCallbacks(dimNow)
-        setBrightness(WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE)
+        com.arashrasoulzadeh.einkdash.util.DeviceControls.applyBrightness(this)
         if (com.arashrasoulzadeh.einkdash.face.Night.isNight(this)) setBrightness(com.arashrasoulzadeh.einkdash.face.Night.BRIGHTNESS)
         val min = appPrefs.dimAfterMin
-        if (min > 0) handler.postDelayed(dimNow, min * 60_000L)
+        var delay = if (min > 0) min * 60_000L else Long.MAX_VALUE
+        // Battery saver: put the sleep face up just before Android turns the screen off,
+        // so that is the image the e-ink panel holds while the device sleeps.
+        if (!appPrefs.keepScreenOn && appPrefs.sleepFace) {
+            delay = minOf(delay, (com.arashrasoulzadeh.einkdash.util.DeviceControls.screenTimeoutMs(this) - 8_000).coerceAtLeast(10_000))
+        }
+        if (delay != Long.MAX_VALUE) handler.postDelayed(dimNow, delay)
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -132,10 +138,14 @@ class HomeActivity : BaseActivity() {
                 recreate()
             }
         }
+        val rotate = com.arashrasoulzadeh.einkdash.util.RotateIcon(this).apply {
+            setOnClickListener { com.arashrasoulzadeh.einkdash.util.DeviceControls.rotate(this@HomeActivity) }
+        }
         normalBar = LinearLayout(this).apply {
             val h = Ui.dp(context, 48f)
             addView(apps, LinearLayout.LayoutParams(0, h, 1f))
-            addView(lang, LinearLayout.LayoutParams(Ui.dp(context, 56f), h))
+            addView(lang, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
+            addView(rotate, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
             addView(pageLabel, LinearLayout.LayoutParams(0, h, 0.5f))
             addView(status, LinearLayout.LayoutParams(0, h, 1.5f))
         }

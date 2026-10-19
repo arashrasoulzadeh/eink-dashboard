@@ -152,3 +152,15 @@ class ExpandIcon(context: Context) : View(context) {
         canvas.drawLine(r, b, r - k, b, pen); canvas.drawLine(r, b, r, b - k, pen)
     }
 }
+
+/** Rotate affordance: a portrait outline with a landscape outline behind it. */
+class RotateIcon(context: Context) : View(context) {
+    private val pen = ink(context, 1.8f)
+
+    override fun onDraw(canvas: Canvas) {
+        val u = min(width, height) / 16f
+        val cx = width / 2f; val cy = height / 2f
+        canvas.drawRoundRect(RectF(cx - 2 * u, cy - 3.2f * u, cx + 2 * u, cy + 3.2f * u), u * 0.6f, u * 0.6f, pen)
+        canvas.drawRoundRect(RectF(cx - 3.2f * u, cy - 0.4f * u, cx + 3.2f * u, cy + 3.6f * u), u * 0.6f, u * 0.6f, pen)
+    }
+}

@@ -56,7 +56,7 @@ class WeatherWidget : DashboardWidget {
             }
             temp.visibility = VISIBLE
             render(store.cache)
-            if (!fetching && store.isStale(System.currentTimeMillis())) {
+            if (!fetching && store.isStale(System.currentTimeMillis()) && com.arashrasoulzadeh.einkdash.util.DeviceControls.online(context)) {
                 fetching = true
                 Bg.run({ store.fetch() }) { fetching = false; changed() }
             }

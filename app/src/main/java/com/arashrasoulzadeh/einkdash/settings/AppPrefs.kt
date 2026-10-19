@@ -12,8 +12,9 @@ class AppPrefs(context: Context) {
         get() = prefs.getString("language", "system")!!
         set(v) = prefs.edit().putString("language", v).apply()
 
+    /** false = battery saver: show the sleep face, then let the device sleep (e-ink keeps the image). */
     var keepScreenOn: Boolean
-        get() = prefs.getBoolean("keepScreenOn", true)
+        get() = prefs.getBoolean("keepScreenOn", false)
         set(v) = prefs.edit().putBoolean("keepScreenOn", v).apply()
 
     /** Minutes without a touch before the frontlight goes dark; 0 = never. */
@@ -59,6 +60,16 @@ class AppPrefs(context: Context) {
         get() = prefs.getString("noteServerPin", null) ?: Random.nextInt(1000, 10000).toString().also {
             prefs.edit().putString("noteServerPin", it).apply()
         }
+
+    /** "auto", "portrait" or "landscape". */
+    var orientation: String
+        get() = prefs.getString("orientation", "auto")!!
+        set(v) = prefs.edit().putString("orientation", v).apply()
+
+    /** Chosen brightness 0..1; negative = leave it to the system. */
+    var brightness: Float
+        get() = prefs.getFloat("brightness", -1f)
+        set(v) = prefs.edit().putFloat("brightness", v).apply()
 
     companion object {
         val DIM_CHOICES = intArrayOf(0, 1, 2, 5, 10)

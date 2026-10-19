@@ -35,7 +35,7 @@ class LatencyWidget : DashboardWidget {
             urls.forEachIndexed { i, url -> bind(rows.getChildAt(i * 2) as LinearLayout, url) }
             val lastRun = store.ranAt
             label(R.string.widget_latency, if (lastRun > 0) num(android.text.format.DateFormat.format("HH:mm", lastRun).toString()) else null)
-            if (urls.isNotEmpty() && !probing && store.isStale(System.currentTimeMillis())) {
+            if (urls.isNotEmpty() && !probing && store.isStale(System.currentTimeMillis()) && com.arashrasoulzadeh.einkdash.util.DeviceControls.online(context)) {
                 probing = true
                 Bg.run({ store.probeAll() }) { probing = false; changed() }
             }

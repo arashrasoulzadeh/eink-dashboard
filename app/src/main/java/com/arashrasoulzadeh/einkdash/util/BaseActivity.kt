@@ -13,6 +13,11 @@ open class BaseActivity : Activity() {
         super.attachBaseContext(wrap(base))
     }
 
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        DeviceControls.applyOrientation(this)
+    }
+
     override fun finish() {
         super.finish()
         overridePendingTransition(0, 0)

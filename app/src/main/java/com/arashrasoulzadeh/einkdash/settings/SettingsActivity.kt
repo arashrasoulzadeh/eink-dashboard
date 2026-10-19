@@ -59,7 +59,8 @@ class SettingsActivity : BaseActivity() {
         ))
 
         section(R.string.settings_display)
-        toggle({ getString(R.string.keep_screen_on, onOff(prefs.keepScreenOn)) }) { prefs.keepScreenOn = !prefs.keepScreenOn }
+        toggle({ getString(if (prefs.keepScreenOn) R.string.screen_mode_on else R.string.screen_mode_saver) }) { prefs.keepScreenOn = !prefs.keepScreenOn }
+        note { getString(R.string.saver_help) }
         toggle({ if (prefs.dimAfterMin == 0) getString(R.string.dim_never) else getString(R.string.dim_after, prefs.dimAfterMin) }) {
             prefs.dimAfterMin = next<Int>(AppPrefs.DIM_CHOICES, prefs.dimAfterMin)
         }

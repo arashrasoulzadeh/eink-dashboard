@@ -51,7 +51,8 @@ class FaceActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mode = intent.getStringExtra(EXTRA_MODE) ?: SLEEP
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // In battery saver the device may sleep under the sleep face; the clock face is only shown while charging.
+        if (com.arashrasoulzadeh.einkdash.settings.AppPrefs(this).keepScreenOn || mode == CLOCK) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         applyBrightness()
         val pad = Ui.dp(this, 24f)
         body = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(pad, pad, pad, pad) }

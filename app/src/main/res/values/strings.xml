@@ -125,4 +125,16 @@
     <string name="stats_today">%1$s min today</string>
     <string name="pomo_open_reader">Open reader app on focus (reading mode)</string>
     <string name="pomo_dnd">Do Not Disturb during focus</string>
+    <string name="widget_controls">Quick settings</string>
+    <string name="ctl_rotate">Rotate</string>
+    <string name="ctl_system">System</string>
+    <string name="ctl_light_auto">Light: auto</string>
+    <string name="ctl_wifi_on">Wi-Fi ●</string>
+    <string name="ctl_wifi_off">Wi-Fi ○</string>
+    <string name="ctl_always_on">Always on</string>
+    <string name="ctl_saver">Saver</string>
+    <string name="saver_help">Battery saver shows the sleep face just before the screen times out, then lets the device sleep. E-ink keeps the picture without power.</string>
+    <string name="ctl_light">Light %1$s</string>
+    <string name="screen_mode_on">Screen: always on</string>
+    <string name="screen_mode_saver">Screen: battery saver</string>
 </resources>

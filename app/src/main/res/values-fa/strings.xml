@@ -121,4 +121,16 @@
     <string name="stats_today">امروز %1$s دقیقه</string>
     <string name="pomo_open_reader">باز کردن کتاب‌خوان هنگام تمرکز (حالت مطالعه)</string>
     <string name="pomo_dnd">مزاحم نشوید هنگام تمرکز</string>
+    <string name="widget_controls">تنظیمات سریع</string>
+    <string name="ctl_rotate">چرخش</string>
+    <string name="ctl_system">سیستم</string>
+    <string name="ctl_light_auto">نور: خودکار</string>
+    <string name="ctl_wifi_on">وای‌فای ●</string>
+    <string name="ctl_wifi_off">وای‌فای ○</string>
+    <string name="ctl_always_on">همیشه روشن</string>
+    <string name="ctl_saver">صرفه‌جو</string>
+    <string name="saver_help">در حالت صرفه‌جویی، صفحهٔ خواب درست پیش از خاموشی صفحه نمایش داده می‌شود و دستگاه به خواب می‌رود. جوهر الکترونیک تصویر را بدون مصرف برق نگه می‌دارد.</string>
+    <string name="ctl_light">نور %1$s</string>
+    <string name="screen_mode_on">صفحه: همیشه روشن</string>
+    <string name="screen_mode_saver">صفحه: صرفه‌جویی باتری</string>
 </resources>
