@@ -92,4 +92,6 @@
     <string name="latency_waiting">waiting…</string>
     <string name="notes_more">…and %1$s more</string>
     <string name="reading_none">No reader yet</string>
+    <string name="pomo_unit_min">min</string>
+    <string name="pomo_unit_sec">sec</string>
 </resources>

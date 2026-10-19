@@ -32,7 +32,8 @@ class PomodoroWidget : DashboardWidget {
             if (end == 0L) {
                 label(R.string.widget_pomodoro)
                 ring.progress = 0f
-                ring.label = num("${Pomodoro.workMin(context)}:00")
+                ring.label = num("${Pomodoro.workMin(context)}")
+                ring.unit = context.getString(R.string.pomo_unit_min)
                 hint.setText(R.string.pomo_tap_start)
                 return
             }
@@ -41,8 +42,13 @@ class PomodoroWidget : DashboardWidget {
             val left = maxOf(0L, end - System.currentTimeMillis())
             label(R.string.widget_pomodoro, context.getString(if (isBreak) R.string.pomo_break else R.string.pomo_focus))
             ring.progress = 1f - left.toFloat() / total
-            ring.label = if (left <= 60_000) num("0:%02d".format((left + 999) / 1000))
-            else num("${(left + 59_999) / 60_000}′")
+            if (left <= 60_000) {
+                ring.label = num("0:%02d".format((left + 999) / 1000))
+                ring.unit = context.getString(R.string.pomo_unit_sec)
+            } else {
+                ring.label = num("${(left + 59_999) / 60_000}")
+                ring.unit = context.getString(R.string.pomo_unit_min)
+            }
             hint.setText(R.string.pomo_tap_stop)
         }
 

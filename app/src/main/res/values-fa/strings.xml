@@ -89,4 +89,6 @@
     <string name="latency_waiting">در انتظار…</string>
     <string name="notes_more">…و %1$s مورد دیگر</string>
     <string name="reading_none">کتاب‌خوانی انتخاب نشده</string>
+    <string name="pomo_unit_min">دقیقه</string>
+    <string name="pomo_unit_sec">ثانیه</string>
 </resources>

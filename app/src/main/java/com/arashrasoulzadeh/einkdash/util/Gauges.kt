@@ -91,6 +91,10 @@ class Ring(context: Context) : View(context) {
         set(v) { field = v.coerceIn(0f, 1f); invalidate() }
     var label = ""
         set(v) { field = v; invalidate() }
+    /** Small unit line under the label, e.g. "min". */
+    var unit = ""
+        set(v) { field = v; invalidate() }
+    private val unitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK; typeface = Ui.bold; textAlign = Paint.Align.CENTER }
     private val thin = ink(context, 1f)
     private val thick = ink(context, 7f)
     private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK; typeface = Ui.light; textAlign = Paint.Align.CENTER }
@@ -105,7 +109,17 @@ class Ring(context: Context) : View(context) {
         text.textSize = r * 0.62f
         while (text.measureText(label) > r * 1.6f && text.textSize > 8f) text.textSize -= 2f
         val fm = text.fontMetrics
-        canvas.drawText(label, cx, cy - (fm.ascent + fm.descent) / 2, text)
+        if (unit.isEmpty()) {
+            canvas.drawText(label, cx, cy - (fm.ascent + fm.descent) / 2, text)
+        } else {
+            unitPaint.textSize = r * 0.2f
+            val ufm = unitPaint.fontMetrics
+            val labelH = fm.descent - fm.ascent
+            val unitH = ufm.descent - ufm.ascent
+            val top = cy - (labelH + unitH) / 2
+            canvas.drawText(label, cx, top - fm.ascent, text)
+            canvas.drawText(unit, cx, top + labelH - ufm.ascent, unitPaint)
+        }
     }
 }
 
