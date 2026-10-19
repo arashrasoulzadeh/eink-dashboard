@@ -51,6 +51,13 @@ class SettingsActivity : BaseActivity() {
             if (!DefaultHome.isDefault(this)) DefaultHome.request(this)
         }
 
+        section(R.string.settings_lock)
+        toggle({ getString(R.string.lock_toggle, onOff(com.arashrasoulzadeh.einkdash.lock.AppLock.enabled(this))) }) {
+            if (com.arashrasoulzadeh.einkdash.lock.AppLock.enabled(this)) com.arashrasoulzadeh.einkdash.lock.AppLock.disable(this) else askPin()
+        }
+        toggle({ getString(R.string.lock_change) }) { if (com.arashrasoulzadeh.einkdash.lock.AppLock.enabled(this)) askPin() }
+        note { getString(R.string.lock_help) }
+
         section(R.string.settings_language)
         root.addView(Ui.row(this,
             Ui.button(this, R.string.lang_system) { setLanguage("system") },
@@ -109,6 +116,29 @@ class SettingsActivity : BaseActivity() {
     private fun render() {
         renders.forEach { it() }
         Eink.fullRefresh(window.decorView)
+    }
+
+    /** PIN of 4–8 digits, typed twice. */
+    private fun askPin() {
+        fun field() = Ui.input(this, R.string.lock_pin_hint).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+        }
+        val a = field(); val b = field()
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val p = Ui.dp(context, 16f); setPadding(p, p, p, 0)
+            addView(a); addView(Ui.gap(context, 8f)); addView(b)
+        }
+        android.app.AlertDialog.Builder(this).setTitle(R.string.lock_set_pin).setView(box)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val pin = a.text.toString()
+                when {
+                    pin.length !in 4..8 -> Toast.makeText(this, R.string.lock_pin_len, Toast.LENGTH_LONG).show()
+                    pin != b.text.toString() -> Toast.makeText(this, R.string.lock_pin_mismatch, Toast.LENGTH_LONG).show()
+                    else -> { com.arashrasoulzadeh.einkdash.lock.AppLock.setPin(this, pin); render() }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null).show()
     }
 
     private fun setLanguage(lang: String) {

@@ -46,6 +46,12 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
     /** Always-on display: after a quiet spell the frontlight goes off and the sleep face takes over. */
     private val dimNow = Runnable {
         setBrightness(0f)
+        // With the privacy lock on, idle means locked: the lock screen (clock only) replaces the sleep face.
+        if (com.arashrasoulzadeh.einkdash.lock.AppLock.enabled(this)) {
+            com.arashrasoulzadeh.einkdash.lock.AppLock.lock()
+            com.arashrasoulzadeh.einkdash.lock.LockActivity.show(this)
+            return@Runnable
+        }
         if (appPrefs.sleepFace) com.arashrasoulzadeh.einkdash.face.FaceActivity.show(this, com.arashrasoulzadeh.einkdash.face.FaceActivity.SLEEP)
     }
     private var startNight = false
@@ -146,6 +152,17 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
             if (appPrefs.largePrint) paintFlags = paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
             setOnClickListener { appPrefs.largePrint = !appPrefs.largePrint; recreate() }
         }
+        val lockNow = com.arashrasoulzadeh.einkdash.util.LockIcon(this).apply {
+            setOnClickListener {
+                if (com.arashrasoulzadeh.einkdash.lock.AppLock.enabled(this@HomeActivity)) {
+                    com.arashrasoulzadeh.einkdash.lock.AppLock.lock()
+                    com.arashrasoulzadeh.einkdash.lock.LockActivity.show(this@HomeActivity)
+                } else {
+                    android.widget.Toast.makeText(this@HomeActivity, R.string.lock_set_first, android.widget.Toast.LENGTH_LONG).show()
+                    startActivity(Intent(this@HomeActivity, SettingsActivity::class.java))
+                }
+            }
+        }
         val rotate = com.arashrasoulzadeh.einkdash.util.RotateIcon(this).apply {
             setOnClickListener { com.arashrasoulzadeh.einkdash.util.DeviceControls.rotate(this@HomeActivity) }
         }
@@ -155,6 +172,7 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
             addView(lang, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
             addView(rotate, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
             addView(large, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
+            addView(lockNow, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
             addView(pageLabel, LinearLayout.LayoutParams(0, h, 0.5f))
             addView(status, LinearLayout.LayoutParams(0, h, 1.5f))
         }

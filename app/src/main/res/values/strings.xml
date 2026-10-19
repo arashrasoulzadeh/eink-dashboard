@@ -128,13 +128,13 @@
     <string name="widget_controls">Quick settings</string>
     <string name="ctl_rotate">Rotate</string>
     <string name="ctl_system">System</string>
-    <string name="ctl_light_auto">Light: auto</string>
+    <string name="ctl_light_auto">auto</string>
     <string name="ctl_wifi_on">Wi-Fi ●</string>
     <string name="ctl_wifi_off">Wi-Fi ○</string>
-    <string name="ctl_always_on">Always on</string>
+    <string name="ctl_always_on">Awake</string>
     <string name="ctl_saver">Saver</string>
     <string name="saver_help">Battery saver shows the sleep face just before the screen times out, then lets the device sleep. E-ink keeps the picture without power.</string>
-    <string name="ctl_light">Light %1$s</string>
+    <string name="ctl_light">%1$s</string>
     <string name="screen_mode_on">Screen: always on</string>
     <string name="screen_mode_saver">Screen: battery saver</string>
     <string name="due_none">No date</string>
@@ -148,4 +148,18 @@
     <string name="widget_calendar">Calendar</string>
     <string name="large_print">Large print: %1$s</string>
     <string name="pomo_pick">Tap a circle to start</string>
+    <string name="settings_lock">Privacy lock</string>
+    <string name="lock_toggle">Lock with PIN: %1$s</string>
+    <string name="lock_change">Change PIN</string>
+    <string name="lock_set_pin">Set a PIN (type it twice)</string>
+    <string name="lock_pin_hint">PIN (4–8 digits)</string>
+    <string name="lock_pin_len">PIN must be 4–8 digits</string>
+    <string name="lock_pin_mismatch">The two PINs do not match</string>
+    <string name="lock_enter_pin">Enter PIN to see your dashboard</string>
+    <string name="lock_wrong">Wrong PIN</string>
+    <string name="lock_set_first">Set a PIN in Settings → Privacy lock first</string>
+    <string name="lock_help">Locks when idle, when the screen turns off and after a restart. Locked, only the clock shows; notes, endpoints, settings and apps stay hidden.</string>
+    <string name="off_title">Device is off</string>
+    <string name="off_since">Turned off at %1$s</string>
+    <string name="off_hint">Hold the power button to turn it on.</string>
 </resources>

@@ -124,13 +124,13 @@
     <string name="widget_controls">تنظیمات سریع</string>
     <string name="ctl_rotate">چرخش</string>
     <string name="ctl_system">سیستم</string>
-    <string name="ctl_light_auto">نور: خودکار</string>
+    <string name="ctl_light_auto">خودکار</string>
     <string name="ctl_wifi_on">وای‌فای ●</string>
     <string name="ctl_wifi_off">وای‌فای ○</string>
-    <string name="ctl_always_on">همیشه روشن</string>
+    <string name="ctl_always_on">بیدار</string>
     <string name="ctl_saver">صرفه‌جو</string>
     <string name="saver_help">در حالت صرفه‌جویی، صفحهٔ خواب درست پیش از خاموشی صفحه نمایش داده می‌شود و دستگاه به خواب می‌رود. جوهر الکترونیک تصویر را بدون مصرف برق نگه می‌دارد.</string>
-    <string name="ctl_light">نور %1$s</string>
+    <string name="ctl_light">%1$s</string>
     <string name="screen_mode_on">صفحه: همیشه روشن</string>
     <string name="screen_mode_saver">صفحه: صرفه‌جویی باتری</string>
     <string name="due_none">بدون تاریخ</string>
@@ -144,4 +144,18 @@
     <string name="widget_calendar">تقویم</string>
     <string name="large_print">متن درشت: %1$s</string>
     <string name="pomo_pick">برای شروع یک دایره را لمس کنید</string>
+    <string name="settings_lock">قفل حریم خصوصی</string>
+    <string name="lock_toggle">قفل با پین: %1$s</string>
+    <string name="lock_change">تغییر پین</string>
+    <string name="lock_set_pin">پین را دو بار وارد کنید</string>
+    <string name="lock_pin_hint">پین (۴ تا ۸ رقم)</string>
+    <string name="lock_pin_len">پین باید ۴ تا ۸ رقم باشد</string>
+    <string name="lock_pin_mismatch">دو پین یکسان نیستند</string>
+    <string name="lock_enter_pin">برای دیدن داشبورد پین را وارد کنید</string>
+    <string name="lock_wrong">پین اشتباه است</string>
+    <string name="lock_set_first">اول در تنظیمات ← قفل حریم خصوصی یک پین بگذارید</string>
+    <string name="lock_help">هنگام بی‌کاری، خاموش شدن صفحه و پس از راه‌اندازی دوباره قفل می‌شود. در حالت قفل فقط ساعت دیده می‌شود؛ یادداشت‌ها، سرویس‌ها، تنظیمات و برنامه‌ها پنهان می‌مانند.</string>
+    <string name="off_title">دستگاه خاموش است</string>
+    <string name="off_since">خاموش‌شده در %1$s</string>
+    <string name="off_hint">برای روشن کردن دکمهٔ پاور را نگه دارید.</string>
 </resources>

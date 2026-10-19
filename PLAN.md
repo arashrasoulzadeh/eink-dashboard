@@ -76,6 +76,11 @@ A single scheduler ticks the widgets and batches all their view updates into one
   - Default layout v7 (portrait) / v8 (landscape: full-height clock column)
 - [x] Hafez couplet of the day (495 ghazal openings bundled from the hafez project; tap saves to notes), month calendar (Jalali/Gregorian, today circled, due-todo dots), dated todos (due column, today/overdue first), Wi-Fi backup download/restore on the note page, large-print mode (Aa; own 4-spot layout), pomodoro quick-start rings (1/5/15/25)
   - Layout keys: layout9_* (normal) and large1_* (large print)
+- [x] No auto-lock: keep-awake is the default again and every screen shows above Android's swipe keyguard; battery saver is opt-in
+- [x] Privacy lock: own PIN (salted SHA-256), locks on idle / screen off / restart, LockActivity shows clock only, footer lock button
+- [x] "Device is off" page on ACTION_SHUTDOWN / QUICKBOOT_POWEROFF (swaps the front screen's content for speed)
+  - [ ] Verify on the Fidibook that the off page is drawn before power is cut
+- [x] README with 17 screenshots (docs/screenshots)
 - [x] Expand icon on every widget opens it full screen (own ticker); pomodoro shows mm:ss, per-second redraws are partial with a full e-ink refresh once a minute
 - [x] 5. Vazirmatn font (all text), in-app language switch (System/English/فارسی), always-on + frontlight off after idle (default 2 min), JSON backup export/import (system picker on 4.4+, Downloads file on 4.2/4.3), GitHub Actions build + tag releases, README
   - Verified on the API 36 emulator: Persian/RTL dashboard, edit mode and settings; backup export → import round trip

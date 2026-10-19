@@ -164,3 +164,29 @@ class RotateIcon(context: Context) : View(context) {
         canvas.drawRoundRect(RectF(cx - 3.2f * u, cy - 0.4f * u, cx + 3.2f * u, cy + 3.6f * u), u * 0.6f, u * 0.6f, pen)
     }
 }
+
+/** Padlock: shackle arc over a body. */
+class LockIcon(context: Context) : View(context) {
+    private val pen = ink(context, 1.8f)
+
+    override fun onDraw(canvas: Canvas) {
+        val u = min(width, height) / 16f
+        val cx = width / 2f; val cy = height / 2f
+        canvas.drawRoundRect(RectF(cx - 3.2f * u, cy - 0.6f * u, cx + 3.2f * u, cy + 3.8f * u), u * 0.6f, u * 0.6f, pen)
+        canvas.drawArc(RectF(cx - 2f * u, cy - 4.4f * u, cx + 2f * u, cy - 0.4f * u), 180f, 180f, false, pen)
+        canvas.drawLine(cx - 2f * u, cy - 2.4f * u, cx - 2f * u, cy - 0.6f * u, pen)
+        canvas.drawLine(cx + 2f * u, cy - 2.4f * u, cx + 2f * u, cy - 0.6f * u, pen)
+    }
+}
+
+/** Power symbol: an open ring with a bar through the gap. */
+class PowerIcon(context: Context) : View(context) {
+    private val pen = ink(context, 4f).apply { strokeCap = Paint.Cap.ROUND }
+
+    override fun onDraw(canvas: Canvas) {
+        val r = min(width, height) * 0.36f
+        val cx = width / 2f; val cy = height / 2f
+        canvas.drawArc(RectF(cx - r, cy - r, cx + r, cy + r), -60f, 300f, false, pen)
+        canvas.drawLine(cx, cy - r * 1.15f, cx, cy - r * 0.15f, pen)
+    }
+}

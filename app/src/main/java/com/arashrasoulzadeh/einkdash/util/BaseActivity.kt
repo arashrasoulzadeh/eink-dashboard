@@ -16,6 +16,19 @@ open class BaseActivity : Activity() {
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
         DeviceControls.applyOrientation(this)
+        // Show above Android's swipe lock screen, so waking the device returns straight to the dashboard
+        // (the app's own PIN lock below still guards the data).
+        if (android.os.Build.VERSION.SDK_INT >= 27) { setShowWhenLocked(true); setTurnScreenOn(true) }
+        @Suppress("DEPRECATION")
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        com.arashrasoulzadeh.einkdash.lock.OffScreen.front = java.lang.ref.WeakReference(this)
+        // Every screen sits behind the privacy lock except the lock itself and the "off" page.
+        if (this !is com.arashrasoulzadeh.einkdash.lock.LockActivity && this !is com.arashrasoulzadeh.einkdash.lock.OffActivity &&
+            com.arashrasoulzadeh.einkdash.lock.AppLock.isLocked(this)) com.arashrasoulzadeh.einkdash.lock.LockActivity.show(this)
     }
 
     override fun finish() {

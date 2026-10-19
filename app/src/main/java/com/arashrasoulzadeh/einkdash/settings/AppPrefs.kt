@@ -14,7 +14,7 @@ class AppPrefs(context: Context) {
 
     /** false = battery saver: show the sleep face, then let the device sleep (e-ink keeps the image). */
     var keepScreenOn: Boolean
-        get() = prefs.getBoolean("keepScreenOn", false)
+        get() = prefs.getBoolean("keepScreenOn", true)
         set(v) = prefs.edit().putBoolean("keepScreenOn", v).apply()
 
     /** Minutes without a touch before the frontlight goes dark; 0 = never. */

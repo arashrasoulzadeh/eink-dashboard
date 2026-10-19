@@ -71,5 +71,13 @@
             android:launchMode="singleInstance" />
 
         <receiver android:name=".pomodoro.Pomodoro$Receiver" android:exported="false" />
+        <receiver android:name=".lock.OffScreen$Receiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+                <action android:name="android.intent.action.QUICKBOOT_POWEROFF" />
+            </intent-filter>
+        </receiver>
+        <activity android:name=".lock.LockActivity" android:exported="false" android:launchMode="singleTask" android:excludeFromRecents="true" />
+        <activity android:name=".lock.OffActivity" android:exported="false" android:excludeFromRecents="true" />
     </application>
 </manifest>
