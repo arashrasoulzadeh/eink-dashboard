@@ -1,102 +1,112 @@
-# Eink Dash
+<div dir="rtl">
 
-A home-screen launcher for Android e-readers (Fidibook, Boox, PocketBook, Meebook, Bigme) and phones.
-It turns the reader into a calm desk display: a dashboard of widgets drawn in pure black on white, with no animations and a full e-ink refresh on every change, so nothing ghosts.
+# Eink Dash — داشبورد کتاب‌خوان
 
-Runs on **Android 4.2+** (minSdk 17), in **Persian and English** with full right-to-left layout and the Vazirmatn font.
+**فارسی** · [English](README.en.md)
+
+لانچر (صفحهٔ خانه) برای کتاب‌خوان‌های اندرویدی مثل فیدیبوک، بوکس، پاکت‌بوک، میبوک و بیگمی، و همچنین گوشی‌ها.
+کتاب‌خوان را به یک نمایشگر آرام رومیزی تبدیل می‌کند: داشبوردی از ویجت‌ها با رنگ سیاه خالص روی سفید، بدون انیمیشن، و با تازه‌سازی کامل جوهر الکترونیک در هر تغییر، تا هیچ ردی (ghosting) روی صفحه نماند.
+
+روی **اندروید ۴٫۲ به بالا** اجرا می‌شود، به **فارسی و انگلیسی**، با چیدمان کامل راست‌به‌چپ و قلم وزیرمتن.
 
 <p>
-  <img src="docs/screenshots/01-home.png" width="250" alt="Home: clock, dated todos, weather, pomodoro">
-  <img src="docs/screenshots/10-persian.png" width="250" alt="Home in Persian, right-to-left">
-  <img src="docs/screenshots/03-latency.png" width="250" alt="API latency charts and reading stats">
+  <img src="docs/screenshots/10-persian.png" width="250" alt="صفحهٔ خانه به فارسی">
+  <img src="docs/screenshots/01-home.png" width="250" alt="صفحهٔ خانه: ساعت، کارها، آب‌وهوا، پومودورو">
+  <img src="docs/screenshots/03-latency.png" width="250" alt="نمودار تأخیر سرویس‌ها و آمار مطالعه">
 </p>
 
-> Screenshots come from the Android emulator with sample data (weather, latency history, reading minutes).
+> تصویرها از شبیه‌ساز اندروید و با داده‌های نمونه (آب‌وهوا، سابقهٔ تأخیر، دقیقه‌های مطالعه) گرفته شده‌اند.
 
-## The dashboard
+## داشبورد
 
-One page, five spots. Each spot below the clock is a **stack**: swipe it sideways to switch widgets, and the dots under it show where you are. **⛶** opens any widget full screen.
+یک صفحه با پنج جایگاه. هر جایگاه زیر ساعت یک **دسته** است: با کشیدن به چپ و راست، ویجت بعدی را نشان می‌دهد و نقطه‌های زیرش جای شما را نشان می‌دهند. با **⛶** هر ویجت تمام‌صفحه باز می‌شود.
 
-| Spot | Stack |
+| جایگاه | ویجت‌های دسته |
 |---|---|
-| Top | Clock: time, both calendars, how much of the day is left |
-| Middle | **Notes/todo** ↔ Calendar ↔ API latency |
-| Bottom left | Weather ↔ Quote of the day ↔ Reading stats ↔ Continue reading |
-| Bottom right | Pomodoro ↔ Quick settings ↔ Battery |
+| بالا | ساعت: زمان، هر دو تقویم، و مقدار باقی‌ماندهٔ روز |
+| وسط | **یادداشت / کارها** ↔ تقویم ↔ تأخیر API |
+| پایین، راست | آب‌وهوا ↔ بیت روز ↔ آمار مطالعه ↔ ادامهٔ مطالعه |
+| پایین، چپ | پومودورو ↔ تنظیمات سریع ↔ باتری |
 
-The footer holds **Apps**, the language switch (**فا / EN**), rotate, **Aa** (large print), the lock, and battery/online status.
+در نوار پایین: **برنامه‌ها**، تغییر زبان (**فا / EN**)، چرخش صفحه، **Aa** (متن درشت)، قفل، و وضعیت باتری و اینترنت.
 
-## Widgets
-
-<p>
-  <img src="docs/screenshots/02-calendar.png" width="200" alt="Month calendar">
-  <img src="docs/screenshots/04-quote.png" width="200" alt="Hafez couplet of the day">
-  <img src="docs/screenshots/08-pomodoro-running.png" width="200" alt="Pomodoro running">
-  <img src="docs/screenshots/06-quick-settings.png" width="200" alt="Quick settings">
-</p>
-
-- **Clock**: big time, Gregorian and Jalali dates, a day-progress bar.
-- **Notes / todo**: a ruled notebook page. Todos can have a due date; today's and overdue items (◆) come first.
-- **Calendar**: this month as a grid. In Persian it's a Jalali month starting Saturday, with Gregorian numbers small underneath (and the other way round in English). Today is circled; days with due todos have a dot.
-- **API latency**: one row per endpoint with uptime, a bar chart of the last 10 checks (✕ = failed) and the latest time in ms. Checked every 5 minutes, and skipped while offline.
-- **Weather**: Open-Meteo (no API key), using device location or a city search; current conditions plus 3 days, cached for offline.
-- **Quote of the day**: an opening couplet from Hafez's ghazals (495 bundled, works offline). Tap to save it to your notes.
-- **Pomodoro**: when idle, four rings (1, 5, 15, 25 min); tap one to start. While running it shows mm:ss in a progress ring. When it ends, a full-screen notice appears, which works even on readers with no speaker. *Reading focus* can open your reader app and turn on Do Not Disturb.
-- **Reading stats**: day streak and a 7-day bar chart, fed by finished reading-focus sessions.
-- **Continue reading**: opens your reader (Fidibo by default).
-- **Quick settings**: frontlight − / +, Wi-Fi, rotate, screen mode, Android settings.
-- **Battery**: charge level and Wi-Fi.
-
-## Screens
+## ویجت‌ها
 
 <p>
-  <img src="docs/screenshots/13-sleep-face.png" width="200" alt="Sleep face">
-  <img src="docs/screenshots/12-morning-summary.png" width="200" alt="Morning summary">
-  <img src="docs/screenshots/16-lock.png" width="200" alt="Privacy lock">
-  <img src="docs/screenshots/17-device-off.png" width="200" alt="Device is off">
+  <img src="docs/screenshots/02-calendar.png" width="200" alt="تقویم ماه">
+  <img src="docs/screenshots/04-quote.png" width="200" alt="بیت روز از حافظ">
+  <img src="docs/screenshots/08-pomodoro-running.png" width="200" alt="پومودورو در حال اجرا">
+  <img src="docs/screenshots/06-quick-settings.png" width="200" alt="تنظیمات سریع">
 </p>
 
-- **Sleep face**: after an idle spell the frontlight goes off and a calm page with the clock, weather and notes stays on the e-ink panel.
-- **Morning summary**: once a day at a time you choose: both dates, the weather, your top todos, and any endpoints that are down.
-- **Privacy lock**: the app's own PIN lock. It locks when idle, when the screen turns off and after a restart. While locked only the clock and date show; notes, endpoints, settings and apps stay hidden. The PIN is stored as a salted hash.
-- **Device is off**: when the reader shuts down, the screen switches to a clear "Device is off" page. E-ink keeps that image without power, so a switched-off reader never looks like it's still on.
-- **Night theme**: inside a night window, text is larger and the frontlight very dim; while charging at night a single giant clock shows.
+- **ساعت**: ساعت بزرگ، تاریخ شمسی و میلادی، و نوار پیشرفت روز.
+- **یادداشت / کارها**: مثل صفحهٔ خط‌دار دفتر. کارها می‌توانند تاریخ سررسید داشته باشند و کارهای امروز و عقب‌افتاده (◆) اول می‌آیند.
+- **تقویم**: ماه جاری به‌صورت جدول. در فارسی ماه شمسی از شنبه شروع می‌شود و روزهای میلادی کوچک زیر هر روز نوشته می‌شوند (در انگلیسی برعکس). امروز دایره دارد و روزهایی که کار سررسید دارند نقطه می‌خورند.
+- **تأخیر API**: برای هر سرویس یک ردیف، با درصد دسترس‌پذیری، نمودار ۱۰ بررسی آخر (✕ یعنی ناموفق) و آخرین زمان پاسخ به میلی‌ثانیه. هر ۵ دقیقه بررسی می‌شود و وقتی اینترنت قطع است انجام نمی‌شود.
+- **آب‌وهوا**: از Open-Meteo (بدون کلید API)، با مکان دستگاه یا جستجوی شهر؛ وضعیت فعلی به‌اضافهٔ ۳ روز، و ذخیره برای حالت آفلاین.
+- **بیت روز**: هر روز مطلع یکی از غزل‌های حافظ (۴۹۵ غزل داخل برنامه است و بدون اینترنت کار می‌کند). با یک لمس در یادداشت‌ها ذخیره می‌شود.
+- **پومودورو**: وقتی شروع نشده، چهار دایره نشان می‌دهد (۱، ۵، ۱۵ و ۲۵ دقیقه) و با لمس هرکدام شروع می‌شود. در حال اجرا، زمان باقی‌مانده را به‌صورت دقیقه:ثانیه در یک حلقهٔ پیشرفت نشان می‌دهد. در پایان یک پیام تمام‌صفحه می‌آید که روی کتاب‌خوان‌های بی‌بلندگو هم کار می‌کند. *حالت مطالعه* می‌تواند برنامهٔ کتاب‌خوان را باز کند و «مزاحم نشوید» را روشن کند.
+- **آمار مطالعه**: تعداد روزهای پیاپی مطالعه و نمودار ۷ روز گذشته، از جلسه‌های تمام‌شدهٔ حالت مطالعه.
+- **ادامهٔ مطالعه**: برنامهٔ کتاب‌خوان شما (به‌طور پیش‌فرض فیدیبو) را باز می‌کند.
+- **تنظیمات سریع**: نور صفحه − / +، وای‌فای، چرخش، حالت صفحه، و تنظیمات اندروید.
+- **باتری**: میزان شارژ و وضعیت وای‌فای.
+
+## صفحه‌ها
 
 <p>
-  <img src="docs/screenshots/11-landscape.png" width="420" alt="Landscape layout">
+  <img src="docs/screenshots/13-sleep-face.png" width="200" alt="صفحهٔ خواب">
+  <img src="docs/screenshots/12-morning-summary.png" width="200" alt="خلاصهٔ صبح">
+  <img src="docs/screenshots/16-lock.png" width="200" alt="قفل حریم خصوصی">
+  <img src="docs/screenshots/17-device-off.png" width="200" alt="دستگاه خاموش است">
+</p>
+
+- **صفحهٔ خواب**: پس از مدتی بی‌کاری، نور صفحه خاموش می‌شود و صفحه‌ای آرام با ساعت، آب‌وهوا و یادداشت‌ها روی جوهر الکترونیک می‌ماند.
+- **خلاصهٔ صبح**: روزی یک بار در ساعتی که انتخاب می‌کنید: هر دو تاریخ، آب‌وهوا، کارهای مهم، و سرویس‌هایی که قطع‌اند.
+- **قفل حریم خصوصی**: قفل پین مخصوص خود برنامه. هنگام بی‌کاری، خاموش شدن صفحه و پس از راه‌اندازی دوباره قفل می‌شود. در حالت قفل فقط ساعت و تاریخ دیده می‌شود و یادداشت‌ها، سرویس‌ها، تنظیمات و برنامه‌ها پنهان می‌مانند. پین به‌صورت هش‌شده ذخیره می‌شود.
+- **دستگاه خاموش است**: هنگام خاموش شدن کتاب‌خوان، صفحه به «دستگاه خاموش است» تغییر می‌کند. جوهر الکترونیک این تصویر را بدون برق نگه می‌دارد، پس کتاب‌خوان خاموش هیچ‌وقت روشن به نظر نمی‌رسد.
+- **حالت شب**: در بازهٔ شب، متن بزرگ‌تر و نور صفحه بسیار کم می‌شود؛ و اگر شب در حال شارژ باشد، فقط یک ساعت بزرگ نمایش داده می‌شود.
+
+<p>
+  <img src="docs/screenshots/11-landscape.png" width="420" alt="چیدمان افقی">
 </p>
 <p>
-  <img src="docs/screenshots/14-edit-mode.png" width="200" alt="Edit mode">
-  <img src="docs/screenshots/15-settings.png" width="200" alt="Settings">
-  <img src="docs/screenshots/09-apps.png" width="200" alt="App drawer">
+  <img src="docs/screenshots/14-edit-mode.png" width="200" alt="حالت ویرایش">
+  <img src="docs/screenshots/15-settings.png" width="200" alt="تنظیمات">
+  <img src="docs/screenshots/09-apps.png" width="200" alt="فهرست برنامه‌ها">
 </p>
 
-## More
+## امکانات دیگر
 
-- **Stays awake**: the launcher keeps the device from auto-locking and shows above Android's swipe lock, so waking it returns straight to the dashboard. *Battery saver* is available as an option: the sleep face goes up just before the screen timeout and the device then sleeps, with e-ink holding the picture.
-- **Notes from your phone or PC**: turn on *Note page on Wi-Fi* in Settings, then open the address it shows (e.g. `http://192.168.1.20:8080`) in any browser on the same Wi-Fi. Add todos (with dates), download a backup or restore one. Everything needs the PIN shown in Settings.
-- **Edit mode**: long-press the dashboard. Tap a spot, then Add (stacks onto that spot), Remove (the widget showing), Setup, W±/H± to resize, More for pages and Settings. Tap an empty cell to move a spot.
-- **Large print (Aa)**: bigger text and its own simpler four-spot layout; your normal layout stays untouched.
-- **Rotate**: portrait and landscape keep separate layouts, and the choice is remembered.
-- **Default home**: Settings → *Set as default home app* (system prompt on Android 10+, the launcher chooser on 4.x).
-- **Backup**: export or import layouts, settings and notes as JSON, from Settings or over Wi-Fi.
-- **Page-turn and volume keys** flip drawer pages.
+- **بدون قفل خودکار**: لانچر جلوی قفل شدن خودکار دستگاه را می‌گیرد و روی صفحهٔ قفل کشیدنی اندروید نمایش داده می‌شود، پس با بیدار کردن دستگاه مستقیم به داشبورد برمی‌گردید. *صرفه‌جویی باتری* هم به‌عنوان گزینه هست: صفحهٔ خواب درست پیش از خاموشی صفحه نمایش داده می‌شود و بعد دستگاه به خواب می‌رود، و جوهر الکترونیک تصویر را نگه می‌دارد.
+- **یادداشت از گوشی یا رایانه**: در تنظیمات *صفحهٔ یادداشت روی وای‌فای* را روشن کنید و آدرسی را که نشان می‌دهد (مثلاً `http://192.168.1.20:8080`) در هر مرورگری روی همان وای‌فای باز کنید. می‌توانید کار اضافه کنید (با تاریخ)، پشتیبان بگیرید یا بازگردانی کنید. همه‌چیز به پینی نیاز دارد که در تنظیمات نشان داده می‌شود.
+- **حالت ویرایش**: داشبورد را نگه دارید. یک جایگاه را لمس کنید و بعد: افزودن (به همان دسته اضافه می‌شود)، حذف (ویجتی که دیده می‌شود)، تنظیم، پهن‌تر/باریک‌تر/بلندتر/کوتاه‌تر، و «بیشتر» برای صفحه‌ها و تنظیمات. برای جابه‌جایی، یک خانهٔ خالی را لمس کنید.
+- **متن درشت (Aa)**: متن بزرگ‌تر با چیدمان ساده‌تر چهارجایگاهی؛ چیدمان معمولی شما دست نمی‌خورد.
+- **چرخش**: چیدمان عمودی و افقی جدا ذخیره می‌شوند و انتخاب شما به خاطر سپرده می‌شود.
+- **صفحهٔ خانهٔ پیش‌فرض**: تنظیمات ← *تنظیم به‌عنوان صفحهٔ خانهٔ پیش‌فرض* (در اندروید ۱۰ به بالا پنجرهٔ سیستم، در ۴٫x انتخابگر لانچر).
+- **پشتیبان**: خروجی و ورودی چیدمان، تنظیمات و یادداشت‌ها به‌صورت JSON، از تنظیمات یا روی وای‌فای.
+- **دکمه‌های ورق‌زدن و صدا** صفحه‌های فهرست برنامه‌ها را عوض می‌کنند.
 
-## Install
+## نصب
 
-Download the APK from [Releases](https://github.com/arashrasoulzadeh/eink-dashboard/releases) or the latest **Debug build** run under Actions, or build it:
+فایل APK را از [Releases](https://github.com/arashrasoulzadeh/eink-dashboard/releases) یا از آخرین اجرای **Debug build** در بخش Actions بگیرید، یا خودتان بسازید:
+
+</div>
 
 ```bash
 ./gradlew assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Then press Home and choose Eink Dash, or use Settings → *Set as default home app*.
+<div dir="rtl">
 
-## Development
+بعد دکمهٔ Home را بزنید و Eink Dash را انتخاب کنید، یا از تنظیمات ← *تنظیم به‌عنوان صفحهٔ خانهٔ پیش‌فرض* استفاده کنید.
 
-- Kotlin with plain framework Views and **no AndroidX**, so nothing raises the Android 4.2 floor. Networking is `HttpURLConnection` with TLS 1.2 forced on for Android 4.x.
-- Run `./gradlew lintDebug`: it catches API-21+ calls that would crash on Android 4.2.
-- CI: **Tests** (unit tests + lint) and **Debug build** (APK artifact) run on every push and pull request. Pushing a tag like `v0.2.0` attaches the APK to a GitHub release. The APK is debug-signed, which is fine for sideloading; add a signing config before distributing more widely.
+## توسعه
 
-Font: [Vazirmatn](https://github.com/rastikerdar/vazirmatn), SIL Open Font License 1.1 (`app/src/main/assets/fonts/OFL.txt`). Hafez text: public domain, from [Ganjoor](https://ganjoor.net).
+- کاتلین با Viewهای خود اندروید و **بدون AndroidX**، تا حداقل نسخهٔ اندروید از ۴٫۲ بالاتر نرود. ارتباط شبکه با `HttpURLConnection` است و TLS 1.2 برای اندروید ۴٫x روشن می‌شود.
+- `./gradlew lintDebug` را اجرا کنید: فراخوانی‌هایی را پیدا می‌کند که روی اندروید ۴٫۲ باعث کرش می‌شوند.
+- CI: دو workflow با هر push و pull request اجرا می‌شود: **Tests** (آزمون‌ها و lint) و **Debug build** (فایل APK). با push کردن یک تگ مثل `v0.2.0` فایل APK به یک Release ضمیمه می‌شود. امضای APK از نوع debug است که برای نصب دستی کافی است؛ پیش از انتشار گسترده‌تر یک کلید امضا اضافه کنید.
+
+قلم: [وزیرمتن](https://github.com/rastikerdar/vazirmatn) با مجوز SIL Open Font License 1.1 (`app/src/main/assets/fonts/OFL.txt`). متن اشعار حافظ: مالکیت عمومی، از [گنجور](https://ganjoor.net).
+
+</div>
