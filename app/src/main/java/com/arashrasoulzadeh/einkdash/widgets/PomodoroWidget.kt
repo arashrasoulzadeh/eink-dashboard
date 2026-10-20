@@ -63,7 +63,8 @@ class PomodoroWidget : DashboardWidget {
         }
 
         private fun afterTap() {
-            refresh(); Eink.fullRefresh(rootView)
+            // The play/pause icon changes shape: a partial update leaves its old outline, so refresh the card fully.
+            refresh(); Eink.fullView(this)
             // Without this the host keeps its once-a-minute schedule and the countdown looks frozen.
             retick()
         }
