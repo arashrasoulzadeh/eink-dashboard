@@ -29,9 +29,11 @@ class Icon(context: Context, var kind: Kind, private val filled: Boolean = false
     init { if (android.os.Build.VERSION.SDK_INT < 18) setLayerType(LAYER_TYPE_SOFTWARE, null) }
 
     override fun onDraw(canvas: Canvas) {
-        val s = min(width, height).toFloat()
+        // Respect padding (round buttons pad the glyph inside their disc).
+        val w = width - paddingLeft - paddingRight; val h = height - paddingTop - paddingBottom
+        val s = min(w, h).toFloat()
         if (s <= 0) return
-        val ox = (width - s) / 2; val oy = (height - s) / 2
+        val ox = paddingLeft + (w - s) / 2; val oy = paddingTop + (h - s) / 2
         var ink = color
         if (filled) {
             fill.color = Ui.INK
@@ -98,7 +100,19 @@ class Icon(context: Context, var kind: Kind, private val filled: Boolean = false
             Kind.NEXT -> { c.line(9f, 5f, 16f, 12f); c.line(16f, 12f, 9f, 19f) }
             Kind.PAUSE -> { pen.strokeWidth = 3f; c.line(9f, 6f, 9f, 18f); c.line(15f, 6f, 15f, 18f) }
             Kind.PLAY -> c.drawPath(Path().apply { moveTo(8f, 5f); lineTo(19f, 12f); lineTo(8f, 19f); close() }, fill)
-            Kind.RESET -> { c.drawArc(RectF(5f, 5f, 19f, 19f), -60f, 300f, false, pen); c.line(15.5f, 4f, 16f, 7.8f); c.line(16f, 7.8f, 12.2f, 8.2f) }
+            Kind.RESET -> {
+                // ↺: a 300° arc from the upper right, running counter-clockwise, with its head at the end.
+                val r = 7.5f; val start = -50f; val sweep = -290f
+                c.drawArc(RectF(12 - r, 12 - r, 12 + r, 12 + r), start, sweep, false, pen)
+                val end = Math.toRadians((start + sweep).toDouble())
+                val ex = 12 + r * cos(end).toFloat(); val ey = 12 + r * sin(end).toFloat()
+                // Direction of travel at the end (counter-clockwise tangent), then two barbs pointing back.
+                val dx = sin(end).toFloat(); val dy = -cos(end).toFloat()
+                for (turn in listOf(0.6, -0.6)) {
+                    val bx = -(dx * cos(turn) - dy * sin(turn)).toFloat(); val by = -(dx * sin(turn) + dy * cos(turn)).toFloat()
+                    c.line(ex, ey, ex + bx * 4f, ey + by * 4f)
+                }
+            }
             Kind.LOCK -> { c.rrect(5f, 11f, 19f, 20.5f, 2f); c.drawArc(RectF(8f, 4f, 16f, 13f), 180f, 180f, false, pen); c.line(8f, 8.5f, 8f, 11f); c.line(16f, 8.5f, 16f, 11f) }
             Kind.ROTATE -> { c.rrect(7f, 3.5f, 14f, 15f, 1.5f); c.rrect(3.5f, 15f, 20.5f, 21f, 1.5f); c.drawArc(RectF(15f, 6f, 21f, 12f), -90f, 180f, false, pen) }
             Kind.WIFI -> { c.drawArc(RectF(2f, 5f, 22f, 25f), 225f, 90f, false, pen); c.drawArc(RectF(6f, 9f, 18f, 21f), 225f, 90f, false, pen); c.drawCircle(12f, 18f, 1.4f, fill) }

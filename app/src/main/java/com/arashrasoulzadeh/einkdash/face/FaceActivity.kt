@@ -77,7 +77,7 @@ class FaceActivity : BaseActivity() {
         val p = com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro
         val total = (if (p.phase(this) == p.BREAK) p.breakMin(this) else p.sessionMin(this)) * 60_000L
         val secs = (left + 999) / 1000
-        ring.progress = 1f - left.toFloat() / total
+        ring.progress = left.toFloat() / total // remaining, same as the home card
         ring.label = num("%d:%02d".format(secs / 60, secs % 60))
     }
 
@@ -158,50 +158,50 @@ class FaceActivity : BaseActivity() {
                 body.addView(Ui.text(this, 18f).apply { text = dates().replace("\n", Fa.sep(this@FaceActivity)); gravity = Gravity.CENTER })
             }
             SLEEP -> {
-                // Night page: status row, crescent, the couplet of the minute, a lake landscape,
-                // then "sleep well" and the time. A running pomodoro sits under the couplet.
+                // Night page, top to bottom: status · moon · couplet · (pomodoro) · divider ·
+                // weather and up to three todos · landscape · "sleep well".
                 body.setPadding(0, 0, 0, 0)
-                val side = Ui.dp(this, 20f)
+                val side = Ui.dp(this, 28f)
+                val soft = 0xFFB5B5B5.toInt()
                 body.addView(LinearLayout(this).apply {
-                    setPadding(side, Ui.dp(context, 10f), side, 0)
-                    addView(light(Ui.text(context, 14f, Ui.bold).apply { text = time() }), LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-                    addView(light(Ui.text(context, 14f).apply { text = battery() }))
+                    setPadding(Ui.dp(context, 20f), Ui.dp(context, 10f), Ui.dp(context, 20f), 0)
+                    addView(Ui.text(context, 13f).apply { text = time(); setTextColor(soft) }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+                    addView(Ui.text(context, 13f).apply { text = battery(); setTextColor(soft) })
                 })
-                body.addView(Ui.gap(this, 1f), LinearLayout.LayoutParams(1, 0, 0.3f))
+                body.addView(Ui.gap(this, 1f), LinearLayout.LayoutParams(1, 0, 0.5f))
                 body.addView(LinearLayout(this).apply {
                     gravity = Gravity.CENTER
                     addView(com.arashrasoulzadeh.einkdash.util.Icon(context, com.arashrasoulzadeh.einkdash.util.Icon.Kind.MOON).apply { color = Ui.PAPER },
-                        LinearLayout.LayoutParams(Ui.dp(context, 44f), Ui.dp(context, 44f)))
+                        LinearLayout.LayoutParams(Ui.dp(context, 40f), Ui.dp(context, 40f)))
                 })
+                body.addView(Ui.gap(this, 8f))
                 couplet()
                 pomodoro()
-                // Weather and the latest open todos, in light text on the night page.
-                weatherLine()?.let { w ->
-                    body.addView(Ui.gap(this, 14f))
-                    body.addView(light(Ui.text(this, 17f, Ui.bold)).apply { text = w; gravity = Gravity.CENTER })
-                }
                 val todos = com.arashrasoulzadeh.einkdash.notes.NotesDb.of(this).all().filter { !it.done }.take(3)
-                if (todos.isNotEmpty()) {
-                    body.addView(Ui.gap(this, 12f))
-                    todos.forEach { n ->
-                        body.addView(light(Ui.text(this, 16f)).apply {
-                            text = "☐  " + n.text + if (n.due != 0) Fa.sep(context) + com.arashrasoulzadeh.einkdash.notes.NotesDb.dueLabel(context, n.due) else ""
-                            gravity = Gravity.CENTER; setSingleLine(); ellipsize = android.text.TextUtils.TruncateAt.END
-                            setPadding(side, Ui.dp(context, 2f), side, Ui.dp(context, 2f))
-                        })
-                    }
+                val weather = weatherLine()
+                if (weather != null || todos.isNotEmpty()) {
+                    body.addView(Ui.gap(this, 18f))
+                    body.addView(LinearLayout(this).apply {
+                        gravity = Gravity.CENTER
+                        addView(android.view.View(context).apply { setBackgroundColor(0xFF3A3A3A.toInt()) }, LinearLayout.LayoutParams(Ui.dp(context, 120f), Ui.dp(context, 1f)))
+                    })
+                    body.addView(Ui.gap(this, 14f))
                 }
-                body.addView(Ui.gap(this, 1f), LinearLayout.LayoutParams(1, 0, 0.3f))
-                body.addView(com.arashrasoulzadeh.einkdash.util.NightScene(this), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
-                body.addView(LinearLayout(this).apply {
-                    orientation = LinearLayout.VERTICAL
-                    gravity = Gravity.CENTER
-                    setBackgroundColor(0xFF151515.toInt())
-                    setPadding(0, Ui.dp(context, 6f), 0, Ui.dp(context, 12f))
-                    addView(com.arashrasoulzadeh.einkdash.util.Icon(context, com.arashrasoulzadeh.einkdash.util.Icon.Kind.MOON).apply { color = 0xFFCCCCCC.toInt() },
-                        LinearLayout.LayoutParams(Ui.dp(context, 22f), Ui.dp(context, 22f)))
-                    addView(light(Ui.text(context, 14f).apply { setText(R.string.sleep_well); gravity = Gravity.CENTER }))
-                    addView(light(Ui.text(context, 13f).apply { text = time(); gravity = Gravity.CENTER; setTextColor(0xFFAAAAAA.toInt()) }))
+                weather?.let { w -> body.addView(Ui.text(this, 16f).apply { text = w; gravity = Gravity.CENTER; setTextColor(Ui.PAPER) }) }
+                if (todos.isNotEmpty()) body.addView(Ui.gap(this, 8f))
+                todos.forEach { n ->
+                    body.addView(Ui.text(this, 15f).apply {
+                        text = "☐  " + n.text + if (n.due != 0) Fa.sep(context) + com.arashrasoulzadeh.einkdash.notes.NotesDb.dueLabel(context, n.due) else ""
+                        setTextColor(soft); gravity = Gravity.CENTER; setSingleLine(); ellipsize = android.text.TextUtils.TruncateAt.END
+                        setPadding(side, Ui.dp(context, 3f), side, Ui.dp(context, 3f))
+                    })
+                }
+                body.addView(Ui.gap(this, 1f), LinearLayout.LayoutParams(1, 0, 0.5f))
+                body.addView(com.arashrasoulzadeh.einkdash.util.NightScene(this), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 0.9f))
+                body.addView(Ui.text(this, 13f).apply {
+                    text = getString(R.string.sleep_well) + Fa.sep(context) + time()
+                    gravity = Gravity.CENTER; setTextColor(soft); setBackgroundColor(0xFF151515.toInt())
+                    setPadding(0, Ui.dp(context, 8f), 0, Ui.dp(context, 12f))
                 })
             }
             else -> { // SUMMARY

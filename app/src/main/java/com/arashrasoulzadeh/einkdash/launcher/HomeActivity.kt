@@ -110,9 +110,9 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
             if (minuteTick) { updateStatus(); timeOfDay() }
             // Seconds-level ticks (running pomodoro) redraw partially; the anti-ghosting flash runs once a minute.
             if (minuteTick) {
-                Eink.fullRefresh(window.decorView); lastFull = now
-                // Idle for a minute and five minutes since the last clean: clear built-up ghosting.
-                if (now - lastTouch > 60_000 && now - lastClean > 5 * 60_000) clean()
+                lastFull = now
+                // Full clean once a minute so nothing builds up (skipped right after another clean).
+                if (now - lastClean > 20_000) clean() else Eink.fullRefresh(window.decorView)
             }
             val delay = minOf(60_000 - now % 60_000, grid.nextDelayMs(now)).coerceAtLeast(250)
             handler.postDelayed(this, delay)

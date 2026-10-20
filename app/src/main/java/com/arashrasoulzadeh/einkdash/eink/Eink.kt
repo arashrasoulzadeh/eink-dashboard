@@ -54,13 +54,20 @@ object Eink {
      */
     fun clean(activity: Activity) {
         val decor = activity.window.decorView as? ViewGroup ?: return
-        if (hasEpd && epd(decor, "EPD_FULL")) { decor.invalidate(); return }
         if (isOnyx && onyxFullRefresh(decor)) return
+        // On Rockchip the full mode alone still left traces on the Fidibook, so do both: switch the
+        // panel to full refresh and drive every pixel black then white, then return to clean partial.
+        if (hasEpd) epd(decor, "EPD_FULL")
         val cover = View(activity).apply { setBackgroundColor(0xFF000000.toInt()) }
         decor.addView(cover, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         val h = Handler(Looper.getMainLooper())
-        h.postDelayed({ cover.setBackgroundColor(0xFFFFFFFF.toInt()) }, 180)
-        h.postDelayed({ decor.removeView(cover); fullRefresh(decor) }, 360)
+        h.postDelayed({ cover.setBackgroundColor(0xFFFFFFFF.toInt()) }, 220)
+        h.postDelayed({
+            decor.removeView(cover)
+            if (hasEpd) epd(decor, "EPD_FULL")
+            decor.invalidate()
+        }, 440)
+        if (hasEpd) h.postDelayed({ epd(decor, "EPD_PART") }, 900)
     }
 
     /** Sets a window's default update mode to clean partial, instead of the firmware's fast (ghosting) choice. */
