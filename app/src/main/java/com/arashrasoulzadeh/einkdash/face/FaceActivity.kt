@@ -42,9 +42,15 @@ class FaceActivity : BaseActivity() {
             val due = Night.dueFace(this@FaceActivity)
             if (due != null && due != mode) { mode = due; applyBrightness() }
             else if (mode == CLOCK && due == null) return finish()
+            com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro.checkFinished(this@FaceActivity)
             render()
             Eink.fullRefresh(window.decorView)
-            handler.postDelayed(this, 60_000 - System.currentTimeMillis() % 60_000 + 50)
+            // Next redraw: the clock's minute change, or sooner if a running pomodoro's minute count changes first.
+            val now = System.currentTimeMillis()
+            var delay = 60_000 - now % 60_000 + 50
+            val end = com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro.endAt(this@FaceActivity)
+            if (mode == SLEEP && end > now) delay = minOf(delay, (end - now) % 60_000 + 50)
+            handler.postDelayed(this, delay)
         }
     }
 
@@ -117,6 +123,7 @@ class FaceActivity : BaseActivity() {
                 weight(FitText(this, Ui.light).apply { text = time(); gravity = Gravity.CENTER }, 1.2f)
                 body.addView(Ui.text(this, 18f, Ui.bold).apply { text = dates(); gravity = Gravity.CENTER })
                 weatherLine()?.let { body.addView(Ui.gap(this, 12f)); body.addView(Ui.text(this, 20f).apply { text = it; gravity = Gravity.CENTER }) }
+                pomodoro()
                 body.addView(Ui.gap(this, 20f)); body.addView(Ui.rule(this)); body.addView(Ui.gap(this, 12f))
                 body.addView(Ui.label(this, R.string.widget_notes))
                 notes(6)
@@ -147,6 +154,30 @@ class FaceActivity : BaseActivity() {
                 body.addView(Ui.text(this, 13f).apply { setText(R.string.face_tap); gravity = Gravity.CENTER })
             }
         }
+    }
+
+    /** A running pomodoro on the sleep face: ring + minutes left, refreshed once a minute. */
+    private fun pomodoro() {
+        val p = com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro
+        val end = p.endAt(this)
+        val left = end - System.currentTimeMillis()
+        if (end == 0L || left <= 0) return
+        val isBreak = p.phase(this) == p.BREAK
+        val total = (if (isBreak) p.breakMin(this) else p.sessionMin(this)) * 60_000L
+        val ring = com.arashrasoulzadeh.einkdash.util.Ring(this).apply {
+            progress = 1f - left.toFloat() / total
+            label = num(((left + 59_999) / 60_000).toString())
+            unit = getString(R.string.pomo_unit_min)
+        }
+        body.addView(Ui.gap(this, 16f))
+        body.addView(LinearLayout(this).apply {
+            gravity = Gravity.CENTER
+            addView(ring, LinearLayout.LayoutParams(Ui.dp(context, 110f), Ui.dp(context, 110f)))
+            addView(Ui.text(context, 20f, Ui.bold).apply {
+                text = getString(R.string.widget_pomodoro) + Fa.sep(context) + getString(if (isBreak) R.string.pomo_break else R.string.pomo_focus)
+                setPadding(Ui.dp(context, 16f), 0, Ui.dp(context, 16f), 0)
+            })
+        })
     }
 
     private fun notes(max: Int) {
