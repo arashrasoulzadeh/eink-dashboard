@@ -29,6 +29,8 @@ object Eink {
 
     @Suppress("UNCHECKED_CAST")
     private fun epd(view: View, mode: String): Boolean = runCatching {
+        // The firmware ignores (and logs) requests for views that aren't in a window yet.
+        if (view.windowToken == null) return false
         val m = java.lang.Enum.valueOf(epdModeClass as Class<out Enum<*>>, mode)
         requestEpdMode!!.invoke(view, m)
         true

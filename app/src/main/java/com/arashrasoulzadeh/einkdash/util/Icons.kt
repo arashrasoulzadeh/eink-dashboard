@@ -25,8 +25,9 @@ class Icon(context: Context, var kind: Kind, private val filled: Boolean = false
     }
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
 
-    // The crescent clips to a path, which hardware drawing can't do before Android 4.3.
-    init { if (android.os.Build.VERSION.SDK_INT < 18) setLayerType(LAYER_TYPE_SOFTWARE, null) }
+    // Only the crescent clips to a path, which hardware drawing can't do before Android 4.3. Other icons
+    // stay hardware-drawn: a software layer on 4.2 renders transparent corners black (seen on the reset button).
+    init { if (android.os.Build.VERSION.SDK_INT < 18 && kind == Kind.MOON) setLayerType(LAYER_TYPE_SOFTWARE, null) }
 
     override fun onDraw(canvas: Canvas) {
         // Respect padding (round buttons pad the glyph inside their disc).

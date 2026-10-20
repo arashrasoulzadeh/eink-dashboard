@@ -26,7 +26,8 @@ open class BaseActivity : Activity() {
     override fun onResume() {
         super.onResume()
         com.arashrasoulzadeh.einkdash.lock.OffScreen.front = java.lang.ref.WeakReference(this)
-        com.arashrasoulzadeh.einkdash.eink.Eink.preferClean(this)
+        // The firmware ignores EPD mode requests until the window is attached; post past that point.
+        window.decorView.post { com.arashrasoulzadeh.einkdash.eink.Eink.preferClean(this) }
         // Every screen sits behind the privacy lock except the lock itself and the "off" page.
         if (this !is com.arashrasoulzadeh.einkdash.lock.LockActivity && this !is com.arashrasoulzadeh.einkdash.lock.OffActivity &&
             com.arashrasoulzadeh.einkdash.lock.AppLock.isLocked(this)) com.arashrasoulzadeh.einkdash.lock.LockActivity.show(this)
