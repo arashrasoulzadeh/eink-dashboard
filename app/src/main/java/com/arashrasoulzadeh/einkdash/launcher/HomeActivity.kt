@@ -111,8 +111,8 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
             // Seconds-level ticks (running pomodoro) redraw partially; the anti-ghosting flash runs once a minute.
             if (minuteTick) {
                 lastFull = now
-                // Full clean once a minute so nothing builds up (skipped right after another clean).
-                if (now - lastClean > 20_000) clean() else Eink.fullRefresh(window.decorView)
+                // Full clean every ten minutes; otherwise only when the screen changes (see onWindowFocusChanged).
+                if (now - lastClean >= CLEAN_EVERY_MS) clean() else Eink.fullRefresh(window.decorView)
             }
             val delay = minOf(60_000 - now % 60_000, grid.nextDelayMs(now)).coerceAtLeast(250)
             handler.postDelayed(this, delay)
@@ -135,7 +135,7 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
             onLongPress = { if (!editing) setEditing(true) }
             onCellTap = ::onCellTap
             onStackSwipe = { item, dir ->
-                if (this@HomeActivity.page.tryUpdate(item.cycled(dir))) { rebuild(); save(); refresh(); clean() }
+                if (this@HomeActivity.page.tryUpdate(item.cycled(dir))) { rebuild(); save(); refresh() }
             }
         }
         pageLabel = Ui.text(this, 18f, Ui.bold).apply {
@@ -339,7 +339,6 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
         editBar.visibility = if (on) View.VISIBLE else View.GONE
         if (!on) save()
         refresh()
-        if (!on) clean()
     }
 
     /** Tap a widget to select it; tap an empty cell to move the selection there. */
@@ -417,5 +416,10 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
         KeyEvent.KEYCODE_PAGE_DOWN, KeyEvent.KEYCODE_VOLUME_DOWN -> { flip(1); true }
         KeyEvent.KEYCODE_PAGE_UP, KeyEvent.KEYCODE_VOLUME_UP -> { flip(-1); true }
         else -> super.onKeyDown(keyCode, event)
+    }
+
+    companion object {
+        /** Periodic full refresh; screen changes trigger one too. */
+        const val CLEAN_EVERY_MS = 10 * 60_000L
     }
 }

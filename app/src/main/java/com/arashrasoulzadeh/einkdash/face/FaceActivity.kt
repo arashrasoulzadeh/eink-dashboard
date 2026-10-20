@@ -44,9 +44,11 @@ class FaceActivity : BaseActivity() {
             else if (mode == CLOCK && due == null) return finish()
             com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro.checkFinished(this@FaceActivity)
             render()
-            // Long-lived faces: every minute redraw gets the black/white clean, so nothing ghosts on the
-            // panel over hours. (The pomodoro's 10-second updates stay partial.)
-            if (mode == SUMMARY || !cleaned) Eink.fullRefresh(window.decorView) else Eink.clean(this@FaceActivity)
+            // Full clean on entry (onWindowFocusChanged) and every ten minutes; other minutes redraw partially.
+            val now = System.currentTimeMillis()
+            if (cleaned && mode != SUMMARY && now - lastClean >= com.arashrasoulzadeh.einkdash.launcher.HomeActivity.CLEAN_EVERY_MS) {
+                lastClean = now; Eink.clean(this@FaceActivity)
+            } else Eink.fullRefresh(window.decorView)
             // Full redraw (and new couplet) on the clock's minute change; a running pomodoro ticks separately.
             handler.postDelayed(this, 60_000 - System.currentTimeMillis() % 60_000 + 50)
             handler.removeCallbacks(secondTick)
@@ -116,6 +118,7 @@ class FaceActivity : BaseActivity() {
     }
 
     private var cleaned = false
+    private var lastClean = System.currentTimeMillis()
 
     /** Once the window is really on screen, flash it clean so the previous screen doesn't ghost through. */
     override fun onWindowFocusChanged(hasFocus: Boolean) {
