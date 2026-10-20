@@ -19,7 +19,7 @@ class AppPrefs(context: Context) {
 
     /** Minutes without a touch before the frontlight goes dark; 0 = never. */
     var dimAfterMin: Int
-        get() = prefs.getInt("dimAfterMin", 2)
+        get() = prefs.getInt("dimAfterMin", 20)
         set(v) = prefs.edit().putInt("dimAfterMin", v).apply()
 
     /** Show the sleep face (clock, notes, weather) when idle. */
@@ -77,7 +77,7 @@ class AppPrefs(context: Context) {
         set(v) = prefs.edit().putBoolean("largePrint", v).apply()
 
     companion object {
-        val DIM_CHOICES = intArrayOf(0, 1, 2, 5, 10)
+        val DIM_CHOICES = intArrayOf(0, 1, 2, 5, 10, 20, 30)
         val SUMMARY_CHOICES = intArrayOf(-1, 6, 7, 8, 9)
         val NIGHT_CHOICES = intArrayOf(-1, 21, 22, 23)
     }
