@@ -36,7 +36,7 @@ class FaceActivity : BaseActivity() {
     private lateinit var mode: String
     private lateinit var body: LinearLayout
 
-    private val tick = object : Runnable {
+    private val tick: Runnable = object : Runnable {
         override fun run() {
             // The home screen is paused under a face, so faces check the schedule themselves.
             val due = Night.dueFace(this@FaceActivity)
@@ -45,13 +45,38 @@ class FaceActivity : BaseActivity() {
             com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro.checkFinished(this@FaceActivity)
             render()
             Eink.fullRefresh(window.decorView)
-            // Next redraw: the clock's minute change, or sooner if a running pomodoro's minute count changes first.
-            val now = System.currentTimeMillis()
-            var delay = 60_000 - now % 60_000 + 50
-            val end = com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro.endAt(this@FaceActivity)
-            if (mode == SLEEP && end > now) delay = minOf(delay, (end - now) % 60_000 + 50)
-            handler.postDelayed(this, delay)
+            // Full redraw (and new couplet) on the clock's minute change; a running pomodoro ticks separately.
+            handler.postDelayed(this, 60_000 - System.currentTimeMillis() % 60_000 + 50)
+            handler.removeCallbacks(secondTick)
+            if (pomoRing != null) handler.post(secondTick)
         }
+    }
+
+    private var pomoRing: com.arashrasoulzadeh.einkdash.util.Ring? = null
+
+    /**
+     * Seconds on the pomodoro ring, updated every 10 s: only the ring redraws (a partial e-ink update),
+     * so the page doesn't flash; the full refresh stays once a minute.
+     */
+    private val secondTick: Runnable = object : Runnable {
+        override fun run() {
+            val ring = pomoRing ?: return
+            val p = com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro
+            val end = p.endAt(this@FaceActivity)
+            val left = end - System.currentTimeMillis()
+            if (end == 0L || left <= 0) { p.checkFinished(this@FaceActivity); tick.run(); return }
+            setRing(ring, left)
+            // Every 10 seconds on the sleep face (on the countdown's 10-second marks): close enough, far fewer redraws.
+            handler.postDelayed(this, (left % 10_000).let { if (it <= 0) 10_000 else it } + 5)
+        }
+    }
+
+    private fun setRing(ring: com.arashrasoulzadeh.einkdash.util.Ring, left: Long) {
+        val p = com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro
+        val total = (if (p.phase(this) == p.BREAK) p.breakMin(this) else p.sessionMin(this)) * 60_000L
+        val secs = (left + 999) / 1000
+        ring.progress = 1f - left.toFloat() / total
+        ring.label = num("%d:%02d".format(secs / 60, secs % 60))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,9 +112,18 @@ class FaceActivity : BaseActivity() {
         tick.run()
     }
 
+    private var cleaned = false
+
+    /** Once the window is really on screen, flash it clean so the previous screen doesn't ghost through. */
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && !cleaned) { cleaned = true; Eink.clean(this) }
+    }
+
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(tick)
+        handler.removeCallbacks(secondTick)
     }
 
     private fun num(s: String) = Fa.digits(this, s)
@@ -114,6 +148,7 @@ class FaceActivity : BaseActivity() {
 
     private fun render() {
         body.removeAllViews()
+        pomoRing = null
         when (mode) {
             CLOCK -> {
                 weight(FitText(this, Ui.light).apply { text = time(); gravity = Gravity.CENTER }, 1f)
@@ -123,10 +158,11 @@ class FaceActivity : BaseActivity() {
                 weight(FitText(this, Ui.light).apply { text = time(); gravity = Gravity.CENTER }, 1.2f)
                 body.addView(Ui.text(this, 18f, Ui.bold).apply { text = dates(); gravity = Gravity.CENTER })
                 weatherLine()?.let { body.addView(Ui.gap(this, 12f)); body.addView(Ui.text(this, 20f).apply { text = it; gravity = Gravity.CENTER }) }
-                pomodoro()
-                body.addView(Ui.gap(this, 20f)); body.addView(Ui.rule(this)); body.addView(Ui.gap(this, 12f))
+                val pomo = pomodoro()
+                couplet()
+                body.addView(Ui.gap(this, 16f)); body.addView(Ui.rule(this)); body.addView(Ui.gap(this, 12f))
                 body.addView(Ui.label(this, R.string.widget_notes))
-                notes(6)
+                notes(if (pomo) 3 else 4)
                 body.addView(Ui.gap(this, 1f), LinearLayout.LayoutParams(1, 0, 0.3f))
                 body.addView(Ui.text(this, 13f).apply { setText(R.string.face_tap); gravity = Gravity.CENTER })
             }
@@ -156,19 +192,16 @@ class FaceActivity : BaseActivity() {
         }
     }
 
-    /** A running pomodoro on the sleep face: ring + minutes left, refreshed once a minute. */
-    private fun pomodoro() {
+    /** A running pomodoro on the sleep face: ring with mm:ss left. Returns whether one is shown. */
+    private fun pomodoro(): Boolean {
         val p = com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro
         val end = p.endAt(this)
         val left = end - System.currentTimeMillis()
-        if (end == 0L || left <= 0) return
+        if (end == 0L || left <= 0) return false
         val isBreak = p.phase(this) == p.BREAK
-        val total = (if (isBreak) p.breakMin(this) else p.sessionMin(this)) * 60_000L
-        val ring = com.arashrasoulzadeh.einkdash.util.Ring(this).apply {
-            progress = 1f - left.toFloat() / total
-            label = num(((left + 59_999) / 60_000).toString())
-            unit = getString(R.string.pomo_unit_min)
-        }
+        val ring = com.arashrasoulzadeh.einkdash.util.Ring(this).apply { unit = getString(R.string.pomo_unit_min_sec) }
+        setRing(ring, left)
+        pomoRing = ring
         body.addView(Ui.gap(this, 16f))
         body.addView(LinearLayout(this).apply {
             gravity = Gravity.CENTER
@@ -178,6 +211,20 @@ class FaceActivity : BaseActivity() {
                 setPadding(Ui.dp(context, 16f), 0, Ui.dp(context, 16f), 0)
             })
         })
+        return true
+    }
+
+    /** A different couplet every minute, with the poet's name. */
+    private fun couplet() {
+        val c = Couplets.forMinute(this) ?: return
+        body.addView(Ui.gap(this, 18f))
+        listOf(c.first, c.second).forEach { line ->
+            body.addView(Ui.text(this, 19f).apply {
+                text = line; gravity = Gravity.CENTER; textDirection = android.view.View.TEXT_DIRECTION_RTL
+                setPadding(0, Ui.dp(context, 2f), 0, Ui.dp(context, 2f))
+            })
+        }
+        body.addView(Ui.text(this, 13f, Ui.bold).apply { text = c.poet; gravity = Gravity.CENTER; setPadding(0, Ui.dp(context, 4f), 0, 0) })
     }
 
     private fun notes(max: Int) {

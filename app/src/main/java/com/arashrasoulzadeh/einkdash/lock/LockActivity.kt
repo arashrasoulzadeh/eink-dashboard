@@ -102,6 +102,14 @@ class LockActivity : BaseActivity() {
     }
 
     override fun onResume() { super.onResume(); handler.removeCallbacks(tick); tick.run() }
+    private var cleaned = false
+
+    /** Once the window is really on screen, flash it clean so the previous screen doesn't ghost through. */
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && !cleaned) { cleaned = true; Eink.clean(this) }
+    }
+
     override fun onPause() { super.onPause(); handler.removeCallbacks(tick) }
 
     // Back can't skip the lock.
