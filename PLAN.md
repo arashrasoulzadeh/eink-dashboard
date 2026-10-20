@@ -81,6 +81,10 @@ A single scheduler ticks the widgets and batches all their view updates into one
 - [x] "Device is off" page on ACTION_SHUTDOWN / QUICKBOOT_POWEROFF (swaps the front screen's content for speed)
   - [ ] Verify on the Fidibook that the off page is drawn before power is cut
 - [x] README with 17 screenshots (docs/screenshots)
+- [x] Card redesign after the user's mockup: rounded light-gray cards, line icons (drawn in code), status row + bottom nav (Home · Apps · Profile), habits, shortcuts and motto widgets, pomodoro play/pause/reset + duration chips, calendar with month arrows, tile app drawer with search, dark sleep face with drawn night scene (couplet, pomodoro, weather, last todos)
+  - Couplets: 360 from Ganjoor (Hafez, Khayyam, Molavi, Saadi, Eraqi, Baba Taher), picked by coupletIndex/versePosition; Hafez openings rebuilt from the verses table (fixed ghazal 191)
+  - E-ink: black/white clean on sleep/lock entry, every sleep-face minute, on returning home, after stack swipes, and every 5 idle minutes; 600 ms tap guard; 1 s long-press
+  - Android 4.2: path clipping needs software layers (API < 18); Path.op avoided
 - [x] Expand icon on every widget opens it full screen (own ticker); pomodoro shows mm:ss, per-second redraws are partial with a full e-ink refresh once a minute
 - [x] 5. Vazirmatn font (all text), in-app language switch (System/English/فارسی), always-on + frontlight off after idle (default 2 min), JSON backup export/import (system picker on 4.4+, Downloads file on 4.2/4.3), GitHub Actions build + tag releases, README
   - Verified on the API 36 emulator: Persian/RTL dashboard, edit mode and settings; backup export → import round trip

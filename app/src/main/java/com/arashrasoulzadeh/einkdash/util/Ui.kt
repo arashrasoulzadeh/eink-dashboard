@@ -21,6 +21,12 @@ import android.widget.TextView
 object Ui {
     const val INK = 0xFF000000.toInt()
     const val PAPER = 0xFFFFFFFF.toInt()
+    /** Card borders and dividers: a flat light gray (no gradients, so no ghosting). */
+    const val LINE = 0xFF9E9E9E.toInt()
+    /** Secondary text and inactive icons. */
+    const val MUTED = 0xFF3F3F3F.toInt()
+    /** Tile and secondary-button fill. */
+    const val TINT = 0xFFEDEDED.toInt()
 
     // Vazirmatn everywhere: Android 4.x's built-in Persian rendering is poor, and it covers Latin too.
     var regular: Typeface = Typeface.DEFAULT
@@ -33,8 +39,9 @@ object Ui {
     fun init(ctx: Context) {
         fun load(name: String, fallback: Typeface) =
             runCatching { Typeface.createFromAsset(ctx.assets, "fonts/Vazirmatn-$name.ttf") }.getOrDefault(fallback)
-        regular = load("Regular", Typeface.DEFAULT)
-        light = load("Light", Typeface.create("sans-serif-light", Typeface.NORMAL))
+        // Medium for body text and Regular for big figures: darker strokes read better on e-ink.
+        regular = load("Medium", Typeface.DEFAULT)
+        light = load("Regular", Typeface.create("sans-serif", Typeface.NORMAL))
         bold = load("Bold", Typeface.DEFAULT_BOLD)
     }
 
@@ -85,9 +92,30 @@ object Ui {
         setTextColor(INK)
     }
 
-    /** Small bold uppercase label, like a newspaper section head. */
-    fun label(ctx: Context, textRes: Int) = text(ctx, 12f, bold).apply {
-        text = ctx.getString(textRes).uppercase(ctx.resources.configuration.locale)
+    /** Card title: bold, sentence case. */
+    fun label(ctx: Context, textRes: Int) = text(ctx, 15f, bold).apply { setText(textRes) }
+
+    /**
+     * Tap handler for e-ink: ignores repeat taps for 600 ms (a slow redraw invites a second tap, which
+     * would undo the first, e.g. start then pause) and dims the control briefly so the tap is visible.
+     */
+    fun onTap(view: View, action: () -> Unit) {
+        var last = 0L
+        view.setOnClickListener {
+            val now = android.os.SystemClock.uptimeMillis()
+            if (now - last < 600) return@setOnClickListener
+            last = now
+            view.alpha = 0.4f
+            view.postDelayed({ view.alpha = 1f }, 250)
+            action()
+        }
+    }
+
+    /** Rounded outline used for cards and icon tiles. */
+    fun outline(ctx: Context, radiusDp: Float, fill: Int = PAPER, stroke: Int = LINE) = GradientDrawable().apply {
+        setColor(fill)
+        setStroke(dp(ctx, 1.2f), stroke)
+        cornerRadius = dp(ctx, radiusDp).toFloat()
     }
 
     fun rule(ctx: Context) = View(ctx).apply {

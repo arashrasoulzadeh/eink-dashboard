@@ -18,10 +18,11 @@ import com.arashrasoulzadeh.einkdash.util.Ui
 class LatencyWidget : DashboardWidget {
     override val type = "latency"
     override val titleRes = R.string.widget_latency
+    override val icon = com.arashrasoulzadeh.einkdash.util.Icon.Kind.CHART
     override val defaultW = 4
     override val defaultH = 2
 
-    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
+    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes, icon) {
         val store = LatencyStore(context)
         val rows = fill(LinearLayout(context).apply { orientation = LinearLayout.VERTICAL })
         var probing = false

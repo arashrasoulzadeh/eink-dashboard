@@ -34,12 +34,26 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
     private lateinit var grid: DashboardGrid
     private lateinit var pageLabel: TextView
     private lateinit var status: TextView
+    private lateinit var statusBar: LinearLayout
+    private lateinit var clockText: TextView
     private lateinit var normalBar: LinearLayout
     private lateinit var editBar: LinearLayout
     private var pageIndex = 0
     private var editing = false
     private val handler = Handler(Looper.getMainLooper())
     private var lastFull = 0L
+    private var lastClean = 0L
+    private var lastTouch = 0L
+    private var needsClean = true
+
+    /** Black/white clean (see Eink.clean); stamps the time so the idle clean can space itself out. */
+    private fun clean() { lastClean = System.currentTimeMillis(); Eink.clean(this) }
+
+    /** Coming back from another screen leaves its traces on the panel: clean once the home window shows. */
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && needsClean) { needsClean = false; clean() }
+    }
     private lateinit var appPrefs: AppPrefs
     private var startLanguage = ""
 
@@ -80,7 +94,7 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.actionMasked == MotionEvent.ACTION_DOWN) scheduleDim()
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) { scheduleDim(); lastTouch = System.currentTimeMillis() }
         return super.dispatchTouchEvent(ev)
     }
 
@@ -95,7 +109,11 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
             grid.refreshWidgets(onlyFast = !minuteTick, now = now)
             if (minuteTick) { updateStatus(); timeOfDay() }
             // Seconds-level ticks (running pomodoro) redraw partially; the anti-ghosting flash runs once a minute.
-            if (minuteTick) { Eink.fullRefresh(window.decorView); lastFull = now }
+            if (minuteTick) {
+                Eink.fullRefresh(window.decorView); lastFull = now
+                // Idle for a minute and five minutes since the last clean: clear built-up ghosting.
+                if (now - lastTouch > 60_000 && now - lastClean > 5 * 60_000) clean()
+            }
             val delay = minOf(60_000 - now % 60_000, grid.nextDelayMs(now)).coerceAtLeast(250)
             handler.postDelayed(this, delay)
         }
@@ -117,7 +135,7 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
             onLongPress = { if (!editing) setEditing(true) }
             onCellTap = ::onCellTap
             onStackSwipe = { item, dir ->
-                if (this@HomeActivity.page.tryUpdate(item.cycled(dir))) { rebuild(); save(); refresh() }
+                if (this@HomeActivity.page.tryUpdate(item.cycled(dir))) { rebuild(); save(); refresh(); clean() }
             }
         }
         pageLabel = Ui.text(this, 18f, Ui.bold).apply {
@@ -166,15 +184,39 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
         val rotate = com.arashrasoulzadeh.einkdash.util.RotateIcon(this).apply {
             setOnClickListener { com.arashrasoulzadeh.einkdash.util.DeviceControls.rotate(this@HomeActivity) }
         }
+        // Top status row: time · page dots · quick toggles · battery and Wi-Fi.
+        clockText = Ui.text(this, 15f, Ui.bold)
+        lang.textSize = 14f; large.textSize = 14f
+        statusBar = LinearLayout(this).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            val h = Ui.dp(context, 36f); val s = Ui.dp(context, 36f)
+            addView(clockText, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, h))
+            addView(pageLabel, LinearLayout.LayoutParams(0, h, 1f))
+            addView(lockNow, LinearLayout.LayoutParams(s, h))
+            addView(large, LinearLayout.LayoutParams(s, h))
+            addView(rotate, LinearLayout.LayoutParams(s, h))
+            addView(lang, LinearLayout.LayoutParams(s, h))
+            addView(status, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, h).apply { marginStart = Ui.dp(context, 6f) })
+        }
+        status.textSize = 14f
+        // Bottom navigation: Home · Apps · Profile (settings), like a reader's own launcher.
+        fun navItem(kind: com.arashrasoulzadeh.einkdash.util.Icon.Kind, label: Int, active: Boolean, open: () -> Unit) = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setOnClickListener { open() }
+            addView(com.arashrasoulzadeh.einkdash.util.Icon(context, kind).apply { if (!active) color = Ui.MUTED }, LinearLayout.LayoutParams(Ui.dp(context, 24f), Ui.dp(context, 24f)))
+            addView(Ui.text(context, 13f, if (active) Ui.bold else Ui.regular).apply {
+                setText(label); gravity = Gravity.CENTER
+                if (active) paintFlags = paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG else setTextColor(Ui.MUTED)
+            })
+        }
         normalBar = LinearLayout(this).apply {
-            val h = Ui.dp(context, 48f)
-            addView(apps, LinearLayout.LayoutParams(0, h, 1f))
-            addView(lang, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
-            addView(rotate, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
-            addView(large, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
-            addView(lockNow, LinearLayout.LayoutParams(Ui.dp(context, 48f), h))
-            addView(pageLabel, LinearLayout.LayoutParams(0, h, 0.5f))
-            addView(status, LinearLayout.LayoutParams(0, h, 1.5f))
+            val h = Ui.dp(context, 56f)
+            addView(navItem(com.arashrasoulzadeh.einkdash.util.Icon.Kind.HOME, R.string.nav_home, true) {}, LinearLayout.LayoutParams(0, h, 1f))
+            addView(navItem(com.arashrasoulzadeh.einkdash.util.Icon.Kind.GRID, R.string.apps, false) { apps.performClick() }, LinearLayout.LayoutParams(0, h, 1f))
+            addView(navItem(com.arashrasoulzadeh.einkdash.util.Icon.Kind.PERSON, R.string.nav_profile, false) {
+                startActivity(Intent(this@HomeActivity, SettingsActivity::class.java))
+            }, LinearLayout.LayoutParams(0, h, 1f))
         }
         editBar = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -202,8 +244,9 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
             addView(LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(pad, pad, pad, pad)
+                addView(statusBar)
                 addView(grid, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
-                addView(Ui.rule(context))
+                addView(Ui.rule(context).apply { setBackgroundColor(Ui.LINE) })
                 addView(normalBar)
                 addView(editBar)
             })
@@ -231,6 +274,7 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
 
     override fun onPause() {
         super.onPause()
+        needsClean = true
         handler.removeCallbacks(tick)
         handler.removeCallbacks(dimNow)
     }
@@ -249,7 +293,8 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
         @Suppress("DEPRECATION")
         val online = net?.isConnected == true
         val pct = if (level >= 0) com.arashrasoulzadeh.einkdash.util.Fa.digits(this, "${level * 100 / scale}%") else ""
-        status.text = pct + "   " + (if (online) "◉ " else "○ ") + getString(if (online) R.string.status_online else R.string.status_offline)
+        status.text = pct + "  " + (if (online) "◉" else "○")
+        clockText.text = com.arashrasoulzadeh.einkdash.util.Fa.digits(this, java.text.SimpleDateFormat("HH:mm", java.util.Locale.US).format(java.util.Date()))
     }
 
     private fun setupSelected() {
@@ -294,6 +339,7 @@ class HomeActivity : BaseActivity(), com.arashrasoulzadeh.einkdash.widgets.Widge
         editBar.visibility = if (on) View.VISIBLE else View.GONE
         if (!on) save()
         refresh()
+        if (!on) clean()
     }
 
     /** Tap a widget to select it; tap an empty cell to move the selection there. */

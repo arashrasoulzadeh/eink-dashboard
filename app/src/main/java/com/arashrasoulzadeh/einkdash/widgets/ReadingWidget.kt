@@ -15,6 +15,7 @@ import com.arashrasoulzadeh.einkdash.util.Ui
 class ReadingWidget : DashboardWidget {
     override val type = "reading"
     override val titleRes = R.string.widget_reading
+    override val icon = com.arashrasoulzadeh.einkdash.util.Icon.Kind.BOOK
     override val defaultW = 4
     override val defaultH = 2
 
@@ -46,7 +47,7 @@ class ReadingWidget : DashboardWidget {
             .sortedBy { it.second.lowercase() }
     }
 
-    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
+    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes, icon) {
         val app = fill(FitText(context, Ui.light, 40f).apply { gravity = android.view.Gravity.CENTER_VERTICAL })
         val hint = line(14f, Ui.bold)
 

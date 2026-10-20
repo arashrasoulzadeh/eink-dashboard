@@ -14,7 +14,7 @@ class LayoutStore(context: Context) {
 
     fun load(orientation: Int): DashboardLayout {
         val landscape = orientation == Configuration.ORIENTATION_LANDSCAPE
-        val (cols, rows) = if (landscape) 6 to 4 else 4 to 6
+        val (cols, rows) = if (landscape) 6 to 4 else 4 to 8
         return prefs.getString(key(landscape), null)
             ?.let { DashboardLayout.fromJson(it, cols, rows) }
             ?: defaultLayout(landscape, cols, rows)
@@ -24,28 +24,31 @@ class LayoutStore(context: Context) {
         prefs.edit().putString(key(orientation == Configuration.ORIENTATION_LANDSCAPE), layout.toJson()).apply()
     }
 
-    // v9: calendar and quote join the stacks; bumping the key moves existing installs onto the new defaults.
-    private fun key(landscape: Boolean) = (if (large) "large1_" else "layout9_") + if (landscape) "landscape" else "portrait"
+    // v10: card design (4x8 portrait grid); bumping the key moves existing installs onto the new defaults.
+    private fun key(landscape: Boolean) = (if (large) "large2_" else "layout10_") + if (landscape) "landscape" else "portrait"
 
     private fun defaultLayout(landscape: Boolean, cols: Int, rows: Int): DashboardLayout {
-        val notes = listOf("notes", "calendar", "latency")
-        val info = listOf("weather", "quote", "readingStats", "reading")
-        val focus = listOf("pomodoro", "controls", "battery")
+        // Spots are stacks: swipe to reach the rest. Positions follow the card mockup
+        // (logical column 0 is the start side, i.e. the right in Persian).
+        val quote = listOf("quote", "clock", "weather")
+        val focus = listOf("pomodoro", "controls", "readingStats")
+        val month = listOf("calendar", "notes", "latency")
+        val habits = listOf("habits", "battery", "reading")
         val spots = when {
-            // Large print: four big spots, every widget reachable by swiping.
             large && landscape -> listOf(
-                listOf("clock") to intArrayOf(0, 0, 3, 2), notes + "quote" to intArrayOf(3, 0, 3, 2),
-                info - "quote" to intArrayOf(0, 2, 3, 2), focus to intArrayOf(3, 2, 3, 2))
+                quote to intArrayOf(0, 0, 3, 2), focus to intArrayOf(0, 2, 3, 2),
+                month + habits to intArrayOf(3, 0, 3, 3), listOf("shortcuts") to intArrayOf(3, 3, 3, 1))
             large -> listOf(
-                listOf("clock") to intArrayOf(0, 0, 4, 2), notes to intArrayOf(0, 2, 4, 2),
-                info to intArrayOf(0, 4, 2, 2), focus to intArrayOf(2, 4, 2, 2))
-            // Landscape is short: the clock gets a full-height column so its figure can stay large.
+                quote to intArrayOf(0, 0, 4, 2), focus to intArrayOf(0, 2, 2, 3), month + habits to intArrayOf(2, 2, 2, 3),
+                listOf("shortcuts") to intArrayOf(0, 5, 4, 1), listOf("motto", "weather") to intArrayOf(0, 6, 4, 2))
             landscape -> listOf(
-                listOf("clock") to intArrayOf(0, 0, 2, 4), notes to intArrayOf(2, 0, 4, 2),
-                info to intArrayOf(2, 2, 2, 2), focus to intArrayOf(4, 2, 2, 2))
+                quote to intArrayOf(0, 0, 2, 2), focus to intArrayOf(0, 2, 2, 2),
+                month to intArrayOf(2, 0, 2, 3), listOf("shortcuts") to intArrayOf(2, 3, 2, 1),
+                habits to intArrayOf(4, 0, 2, 2), listOf("motto", "weather") to intArrayOf(4, 2, 2, 2))
             else -> listOf(
-                listOf("clock") to intArrayOf(0, 0, 4, 2), notes to intArrayOf(0, 2, 4, 2),
-                info to intArrayOf(0, 4, 2, 2), focus to intArrayOf(2, 4, 2, 2))
+                quote to intArrayOf(0, 0, 2, 2), focus to intArrayOf(0, 2, 2, 3),
+                month to intArrayOf(2, 0, 2, 3), habits to intArrayOf(2, 3, 2, 2),
+                listOf("shortcuts") to intArrayOf(0, 5, 4, 1), listOf("motto", "weather") to intArrayOf(0, 6, 4, 2))
         }
         val page = Page(cols, rows)
         spots.forEachIndexed { i, (stack, g) -> page.tryUpdate(Placement(i + 1L, stack, g[0], g[1], g[2], g[3])) }

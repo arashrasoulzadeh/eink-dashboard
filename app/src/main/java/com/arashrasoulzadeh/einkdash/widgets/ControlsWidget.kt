@@ -15,10 +15,11 @@ import com.arashrasoulzadeh.einkdash.util.Ui
 class ControlsWidget : DashboardWidget {
     override val type = "controls"
     override val titleRes = R.string.widget_controls
+    override val icon = com.arashrasoulzadeh.einkdash.util.Icon.Kind.GEAR
     override val defaultW = 2
     override val defaultH = 2
 
-    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
+    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes, icon) {
         val activity = context as Activity
         val prefs = AppPrefs(context)
         val light = Ui.text(context, 14f, Ui.bold).apply { gravity = android.view.Gravity.CENTER }

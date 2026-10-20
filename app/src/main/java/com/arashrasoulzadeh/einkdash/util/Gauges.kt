@@ -94,10 +94,12 @@ class Ring(context: Context) : View(context) {
     /** Small unit line under the label, e.g. "min". */
     var unit = ""
         set(v) { field = v; invalidate() }
-    private val unitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK; typeface = Ui.bold; textAlign = Paint.Align.CENTER }
-    private val thin = ink(context, 1f)
-    private val thick = ink(context, 7f)
-    private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK; typeface = Ui.light; textAlign = Paint.Align.CENTER }
+    private val unitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.MUTED; typeface = Ui.regular; textAlign = Paint.Align.CENTER }
+    private val thin = ink(context, 4f).apply { color = Ui.TINT }
+    private val thick = ink(context, 3.5f).apply { strokeCap = Paint.Cap.ROUND }
+    private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK; typeface = Ui.bold; textAlign = Paint.Align.CENTER }
+    /** Ink colors for drawing on a dark background. */
+    fun inverted() { thin.color = 0xFF444444.toInt(); thick.color = Ui.PAPER; text.color = Ui.PAPER; unitPaint.color = 0xFFBBBBBB.toInt() }
 
     override fun onDraw(canvas: Canvas) {
         val d = min(width, height).toFloat()
@@ -106,13 +108,13 @@ class Ring(context: Context) : View(context) {
         val cx = width / 2f; val cy = height / 2f
         canvas.drawCircle(cx, cy, r, thin)
         if (progress > 0f) canvas.drawArc(RectF(cx - r, cy - r, cx + r, cy + r), -90f, 360f * progress, false, thick)
-        text.textSize = r * 0.62f
+        text.textSize = r * 0.5f
         while (text.measureText(label) > r * 1.6f && text.textSize > 8f) text.textSize -= 2f
         val fm = text.fontMetrics
         if (unit.isEmpty()) {
             canvas.drawText(label, cx, cy - (fm.ascent + fm.descent) / 2, text)
         } else {
-            unitPaint.textSize = r * 0.2f
+            unitPaint.textSize = r * 0.17f
             val ufm = unitPaint.fontMetrics
             val labelH = fm.descent - fm.ascent
             val unitH = ufm.descent - ufm.ascent
@@ -141,7 +143,7 @@ class Meter(context: Context) : View(context) {
 
 /** Four corner brackets: the "open full screen" affordance. */
 class ExpandIcon(context: Context) : View(context) {
-    private val pen = ink(context, 1.8f)
+    private val pen = ink(context, 2.3f)
 
     override fun onDraw(canvas: Canvas) {
         val s = min(width, height) * 0.5f

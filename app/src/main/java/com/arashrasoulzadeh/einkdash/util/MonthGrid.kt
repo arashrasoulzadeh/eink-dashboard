@@ -22,11 +22,15 @@ class MonthGrid(context: Context) : View(context) {
     var today = 0
     var marked: Set<Int> = emptySet()
     var digits: (String) -> String = { it }
+    /** Second-calendar numbers under each day; off in the compact card style. */
+    var showSecondary = false
 
     private val density = resources.displayMetrics.density
     private val big = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK; typeface = Ui.regular; textAlign = Paint.Align.CENTER }
     private val small = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK; typeface = Ui.regular; textAlign = Paint.Align.CENTER }
-    private val head = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK; typeface = Ui.bold; textAlign = Paint.Align.CENTER }
+    private val head = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.MUTED; typeface = Ui.regular; textAlign = Paint.Align.CENTER }
+    private val todayFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK }
+    private val todayText = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.PAPER; typeface = Ui.bold; textAlign = Paint.Align.CENTER }
     private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK; style = Paint.Style.STROKE; strokeWidth = 1.8f * density }
     private val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Ui.INK }
 
@@ -40,7 +44,7 @@ class MonthGrid(context: Context) : View(context) {
         val headH = min(height * 0.12f, 22 * density)
         val ch = (height - headH) / rows
         head.textSize = headH * 0.6f
-        big.textSize = min(cw, ch) * 0.42f
+        big.textSize = min(cw, ch) * (if (showSecondary) 0.42f else 0.46f)
         small.textSize = big.textSize * 0.5f
         fun x(col: Int) = (if (rtl) 6 - col else col) * cw + cw / 2
         weekdays.forEachIndexed { i, w -> canvas.drawText(w, x(i), headH * 0.75f, head) }
@@ -48,10 +52,13 @@ class MonthGrid(context: Context) : View(context) {
             val cell = offset + i
             val cx = x(cell % 7)
             val top = headH + (cell / 7) * ch
-            val cy = top + ch * 0.45f
-            canvas.drawText(digits(d.primary.toString()), cx, cy + big.textSize * 0.35f, big)
-            canvas.drawText(digits(d.secondary.toString()), cx, cy + big.textSize * 0.35f + small.textSize * 1.25f, small)
-            if (d.ymd == today) canvas.drawCircle(cx, cy, min(cw, ch) * 0.44f, ring)
+            val cy = top + ch * (if (showSecondary) 0.45f else 0.5f)
+            val isToday = d.ymd == today
+            // Today: a filled ink disc with paper digits.
+            if (isToday) canvas.drawCircle(cx, cy, min(cw, ch) * 0.44f, todayFill)
+            todayText.textSize = big.textSize
+            canvas.drawText(digits(d.primary.toString()), cx, cy + big.textSize * 0.35f, if (isToday) todayText else big)
+            if (showSecondary) canvas.drawText(digits(d.secondary.toString()), cx, cy + big.textSize * 0.35f + small.textSize * 1.25f, small)
             if (d.ymd in marked) canvas.drawCircle(cx + big.textSize * 0.75f, cy - big.textSize * 0.45f, 2.6f * density, dot)
         }
     }

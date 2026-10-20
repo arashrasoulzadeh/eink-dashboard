@@ -22,10 +22,11 @@ import kotlin.math.roundToInt
 class WeatherWidget : DashboardWidget {
     override val type = "weather"
     override val titleRes = R.string.widget_weather
+    override val icon = com.arashrasoulzadeh.einkdash.util.Icon.Kind.CLOUD
     override val defaultW = 2
     override val defaultH = 2
 
-    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
+    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes, icon) {
         val store = WeatherStore(context)
         val temp = FitText(context, Ui.light).apply { gravity = Gravity.CENTER_VERTICAL }
         val cond = Ui.text(context, 14f, Ui.bold).apply { maxLines = 2 }

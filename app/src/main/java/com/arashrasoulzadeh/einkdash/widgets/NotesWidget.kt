@@ -15,10 +15,11 @@ import com.arashrasoulzadeh.einkdash.util.Ui
 class NotesWidget : DashboardWidget {
     override val type = "notes"
     override val titleRes = R.string.widget_notes
+    override val icon = com.arashrasoulzadeh.einkdash.util.Icon.Kind.NOTE
     override val defaultW = 4
     override val defaultH = 4
 
-    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
+    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes, icon) {
         val lines = fill(LinearLayout(context).apply { orientation = LinearLayout.VERTICAL })
         val lineH = (44 * dp).toInt()
 

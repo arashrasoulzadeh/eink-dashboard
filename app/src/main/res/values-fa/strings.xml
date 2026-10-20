@@ -158,4 +158,19 @@
     <string name="off_title">دستگاه خاموش است</string>
     <string name="off_since">خاموش‌شده در %1$s</string>
     <string name="off_hint">برای روشن کردن دکمهٔ پاور را نگه دارید.</string>
+    <string name="widget_habits">عادت‌های امروز</string>
+    <string name="habits_hint">هر خط یک عادت (حداکثر ۵)</string>
+    <string name="habits_edit">عادت‌ها</string>
+    <string name="widget_shortcuts">میان‌برها</string>
+    <string name="sc_library">کتابخانه</string>
+    <string name="sc_timer">تایمر</string>
+    <string name="widget_motto">شعار روز</string>
+    <string name="nav_home">خانه</string>
+    <string name="nav_profile">پروفایل</string>
+    <string name="apps_search">جستجوی برنامه</string>
+    <string name="pomo_time_left">زمان باقی‌مانده</string>
+    <string name="sleep_well">خواب شیرین</string>
+    <string-array name="default_habits"><item>مطالعه</item><item>ورزش</item><item>مدیتیشن</item><item>نوشتن</item></string-array>
+    <string-array name="mottos"><item>هر روز\nیک قدم کوچک\nبه سوی بهتر شدن</item><item>آرامش،\nآغاز هر موفقیتی است</item><item>هر بار\nیک صفحه</item><item>آهسته و پیوسته\nمی‌رسد</item><item>از همین‌جا\nکه هستی شروع کن</item><item>کمتر،\nاما بهتر</item><item>استراحت\nبخشی از کار است</item></string-array>
+    <string name="sc_habits">عادت‌ها</string>
 </resources>

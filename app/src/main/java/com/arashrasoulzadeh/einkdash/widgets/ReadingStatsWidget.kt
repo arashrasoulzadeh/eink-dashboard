@@ -15,10 +15,11 @@ import java.util.Calendar
 class ReadingStatsWidget : DashboardWidget {
     override val type = "readingStats"
     override val titleRes = R.string.widget_reading_stats
+    override val icon = com.arashrasoulzadeh.einkdash.util.Icon.Kind.BOOK
     override val defaultW = 2
     override val defaultH = 2
 
-    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes) {
+    override fun createView(context: Context): WidgetView = object : WidgetView(context, titleRes, icon) {
         val streak = FitText(context, Ui.light, 60f).apply { gravity = Gravity.CENTER_VERTICAL }
         val today = Ui.text(context, 13f)
         val bars = Spark(context).apply { slots = 7 }

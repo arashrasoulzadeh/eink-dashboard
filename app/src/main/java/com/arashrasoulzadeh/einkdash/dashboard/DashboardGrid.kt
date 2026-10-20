@@ -33,14 +33,13 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
     private val density = resources.displayMetrics.density
     private val thin = Paint().apply { color = 0xFF000000.toInt(); strokeWidth = 1f * density; style = Paint.Style.STROKE }
     private val thick = Paint().apply { color = 0xFF000000.toInt(); strokeWidth = 4f * density; style = Paint.Style.STROKE }
-    private val gap = (6 * density).toInt()
+    private val gap = (5 * density).toInt()
+    private val radius = 16 * density
+    private val card = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = com.arashrasoulzadeh.einkdash.util.Ui.LINE; strokeWidth = 1.2f * density; style = Paint.Style.STROKE }
 
     private val gestures = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent) = true
-        override fun onLongPress(e: MotionEvent) {
-            swallow = true
-            onLongPress?.invoke()
-        }
+        override fun onLongPress(e: MotionEvent) {}
         override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
             if (editMode || e1 == null) return false
             val dx = e2.x - e1.x
@@ -71,7 +70,11 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
     private val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF000000.toInt() }
     private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF000000.toInt(); style = Paint.Style.STROKE; strokeWidth = 1.2f * density }
 
-    init { setWillNotDraw(false) }
+    init {
+        setWillNotDraw(false)
+        // Long-press is our own 1 s timer; the detector's would swallow the swipe that follows a slow press.
+        gestures.setIsLongpressEnabled(false)
+    }
 
     /** Room kept free at the bottom of a stacked cell for its position dots. */
     private fun stackInset(item: Placement) = if (item.stack.size > 1) (12 * density).toInt() else 0
@@ -176,21 +179,26 @@ class DashboardGrid(context: Context) : ViewGroup(context) {
             val l = rect[0].toFloat(); val t = rect[1].toFloat(); val r = rect[2].toFloat(); val b = rect[3].toFloat()
             if (editMode) {
                 canvas.drawRect(l, t, r, b, if (item.id == selectedId) thick else thin)
-            } else {
-                // Paper look: a rule under each widget and a hairline between side-by-side ones.
-                if (item.row + item.h < pg.rows) canvas.drawLine(l, b + gap, r, b + gap, thin)
-                if (item.col > 0) {
-                    val x = if (isRtl()) r + gap else l - gap
-                    canvas.drawLine(x, t + gap, x, b - gap, thin)
-                }
+            } else if (WidgetRegistry.get(item.type)?.cardless != true) {
+                // Card: rounded light-gray outline.
+                canvas.drawRoundRect(android.graphics.RectF(l, t, r, b), radius, radius, card)
             }
         }
     }
 
     private fun itemFor(child: View): Placement? = page?.items?.firstOrNull { it.id == ids[child] }
 
+    /** Edit mode opens after a full second, longer than Android's default long-press. */
+    private val longPress = Runnable { swallow = true; onLongPress?.invoke() }
+    private var downX = 0f
+    private var downY = 0f
+
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.actionMasked == MotionEvent.ACTION_DOWN) swallow = false
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> { swallow = false; downX = ev.x; downY = ev.y; if (!editMode) postDelayed(longPress, 1000) }
+            MotionEvent.ACTION_MOVE -> if (Math.abs(ev.x - downX) > 12 * density || Math.abs(ev.y - downY) > 12 * density) removeCallbacks(longPress)
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> removeCallbacks(longPress)
+        }
         gestures.onTouchEvent(ev)
         if (editMode) return true
         // Fling is detected on UP, before the child sees it; send CANCEL instead so the widget doesn't open.

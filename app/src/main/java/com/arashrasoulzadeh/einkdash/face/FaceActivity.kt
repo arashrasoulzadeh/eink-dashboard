@@ -44,7 +44,9 @@ class FaceActivity : BaseActivity() {
             else if (mode == CLOCK && due == null) return finish()
             com.arashrasoulzadeh.einkdash.pomodoro.Pomodoro.checkFinished(this@FaceActivity)
             render()
-            Eink.fullRefresh(window.decorView)
+            // Long-lived faces: every minute redraw gets the black/white clean, so nothing ghosts on the
+            // panel over hours. (The pomodoro's 10-second updates stay partial.)
+            if (mode == SUMMARY || !cleaned) Eink.fullRefresh(window.decorView) else Eink.clean(this@FaceActivity)
             // Full redraw (and new couplet) on the clock's minute change; a running pomodoro ticks separately.
             handler.postDelayed(this, 60_000 - System.currentTimeMillis() % 60_000 + 50)
             handler.removeCallbacks(secondTick)
@@ -89,7 +91,8 @@ class FaceActivity : BaseActivity() {
         body = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(pad, pad, pad, pad) }
         setContentView(FrameLayout(this).apply {
             fitsSystemWindows = true
-            setBackgroundColor(Ui.PAPER)
+            // The sleep face is a night page; the others stay paper-white.
+            setBackgroundColor(if (mode == SLEEP) NIGHT else Ui.PAPER)
             addView(body)
         })
     }
@@ -155,16 +158,51 @@ class FaceActivity : BaseActivity() {
                 body.addView(Ui.text(this, 18f).apply { text = dates().replace("\n", Fa.sep(this@FaceActivity)); gravity = Gravity.CENTER })
             }
             SLEEP -> {
-                weight(FitText(this, Ui.light).apply { text = time(); gravity = Gravity.CENTER }, 1.2f)
-                body.addView(Ui.text(this, 18f, Ui.bold).apply { text = dates(); gravity = Gravity.CENTER })
-                weatherLine()?.let { body.addView(Ui.gap(this, 12f)); body.addView(Ui.text(this, 20f).apply { text = it; gravity = Gravity.CENTER }) }
-                val pomo = pomodoro()
-                couplet()
-                body.addView(Ui.gap(this, 16f)); body.addView(Ui.rule(this)); body.addView(Ui.gap(this, 12f))
-                body.addView(Ui.label(this, R.string.widget_notes))
-                notes(if (pomo) 3 else 4)
+                // Night page: status row, crescent, the couplet of the minute, a lake landscape,
+                // then "sleep well" and the time. A running pomodoro sits under the couplet.
+                body.setPadding(0, 0, 0, 0)
+                val side = Ui.dp(this, 20f)
+                body.addView(LinearLayout(this).apply {
+                    setPadding(side, Ui.dp(context, 10f), side, 0)
+                    addView(light(Ui.text(context, 14f, Ui.bold).apply { text = time() }), LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+                    addView(light(Ui.text(context, 14f).apply { text = battery() }))
+                })
                 body.addView(Ui.gap(this, 1f), LinearLayout.LayoutParams(1, 0, 0.3f))
-                body.addView(Ui.text(this, 13f).apply { setText(R.string.face_tap); gravity = Gravity.CENTER })
+                body.addView(LinearLayout(this).apply {
+                    gravity = Gravity.CENTER
+                    addView(com.arashrasoulzadeh.einkdash.util.Icon(context, com.arashrasoulzadeh.einkdash.util.Icon.Kind.MOON).apply { color = Ui.PAPER },
+                        LinearLayout.LayoutParams(Ui.dp(context, 44f), Ui.dp(context, 44f)))
+                })
+                couplet()
+                pomodoro()
+                // Weather and the latest open todos, in light text on the night page.
+                weatherLine()?.let { w ->
+                    body.addView(Ui.gap(this, 14f))
+                    body.addView(light(Ui.text(this, 17f, Ui.bold)).apply { text = w; gravity = Gravity.CENTER })
+                }
+                val todos = com.arashrasoulzadeh.einkdash.notes.NotesDb.of(this).all().filter { !it.done }.take(3)
+                if (todos.isNotEmpty()) {
+                    body.addView(Ui.gap(this, 12f))
+                    todos.forEach { n ->
+                        body.addView(light(Ui.text(this, 16f)).apply {
+                            text = "☐  " + n.text + if (n.due != 0) Fa.sep(context) + com.arashrasoulzadeh.einkdash.notes.NotesDb.dueLabel(context, n.due) else ""
+                            gravity = Gravity.CENTER; setSingleLine(); ellipsize = android.text.TextUtils.TruncateAt.END
+                            setPadding(side, Ui.dp(context, 2f), side, Ui.dp(context, 2f))
+                        })
+                    }
+                }
+                body.addView(Ui.gap(this, 1f), LinearLayout.LayoutParams(1, 0, 0.3f))
+                body.addView(com.arashrasoulzadeh.einkdash.util.NightScene(this), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+                body.addView(LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = Gravity.CENTER
+                    setBackgroundColor(0xFF151515.toInt())
+                    setPadding(0, Ui.dp(context, 6f), 0, Ui.dp(context, 12f))
+                    addView(com.arashrasoulzadeh.einkdash.util.Icon(context, com.arashrasoulzadeh.einkdash.util.Icon.Kind.MOON).apply { color = 0xFFCCCCCC.toInt() },
+                        LinearLayout.LayoutParams(Ui.dp(context, 22f), Ui.dp(context, 22f)))
+                    addView(light(Ui.text(context, 14f).apply { setText(R.string.sleep_well); gravity = Gravity.CENTER }))
+                    addView(light(Ui.text(context, 13f).apply { text = time(); gravity = Gravity.CENTER; setTextColor(0xFFAAAAAA.toInt()) }))
+                })
             }
             else -> { // SUMMARY
                 body.addView(Ui.text(this, 30f, Ui.light).apply { setText(R.string.summary_title) })
@@ -199,14 +237,14 @@ class FaceActivity : BaseActivity() {
         val left = end - System.currentTimeMillis()
         if (end == 0L || left <= 0) return false
         val isBreak = p.phase(this) == p.BREAK
-        val ring = com.arashrasoulzadeh.einkdash.util.Ring(this).apply { unit = getString(R.string.pomo_unit_min_sec) }
+        val ring = com.arashrasoulzadeh.einkdash.util.Ring(this).apply { unit = getString(R.string.pomo_unit_min_sec); if (mode == SLEEP) inverted() }
         setRing(ring, left)
         pomoRing = ring
         body.addView(Ui.gap(this, 16f))
         body.addView(LinearLayout(this).apply {
             gravity = Gravity.CENTER
-            addView(ring, LinearLayout.LayoutParams(Ui.dp(context, 110f), Ui.dp(context, 110f)))
-            addView(Ui.text(context, 20f, Ui.bold).apply {
+            addView(ring, LinearLayout.LayoutParams(Ui.dp(context, 92f), Ui.dp(context, 92f)))
+            addView(light(Ui.text(context, 18f, Ui.bold)).apply {
                 text = getString(R.string.widget_pomodoro) + Fa.sep(context) + getString(if (isBreak) R.string.pomo_break else R.string.pomo_focus)
                 setPadding(Ui.dp(context, 16f), 0, Ui.dp(context, 16f), 0)
             })
@@ -219,12 +257,22 @@ class FaceActivity : BaseActivity() {
         val c = Couplets.forMinute(this) ?: return
         body.addView(Ui.gap(this, 18f))
         listOf(c.first, c.second).forEach { line ->
-            body.addView(Ui.text(this, 19f).apply {
+            body.addView(light(Ui.text(this, 19f)).apply {
                 text = line; gravity = Gravity.CENTER; textDirection = android.view.View.TEXT_DIRECTION_RTL
                 setPadding(0, Ui.dp(context, 2f), 0, Ui.dp(context, 2f))
             })
         }
-        body.addView(Ui.text(this, 13f, Ui.bold).apply { text = c.poet; gravity = Gravity.CENTER; setPadding(0, Ui.dp(context, 4f), 0, 0) })
+        body.addView(Ui.text(this, 13f).apply { text = "— " + c.poet; gravity = Gravity.CENTER; setTextColor(if (mode == SLEEP) 0xFFAAAAAA.toInt() else Ui.MUTED); setPadding(0, Ui.dp(context, 6f), 0, 0) })
+    }
+
+    /** Paper-colored text on the dark sleep page; unchanged elsewhere. */
+    private fun light(t: android.widget.TextView) = t.apply { if (mode == SLEEP && currentTextColor == Ui.INK) setTextColor(Ui.PAPER) }
+
+    private fun battery(): String {
+        val b = registerReceiver(null, android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED))
+        val level = b?.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1) ?: -1
+        val scale = b?.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, 100) ?: 100
+        return if (level < 0) "" else num("${level * 100 / scale}%")
     }
 
     private fun notes(max: Int) {
@@ -238,6 +286,7 @@ class FaceActivity : BaseActivity() {
         const val SLEEP = "sleep"
         const val SUMMARY = "summary"
         const val CLOCK = "clock"
+        private const val NIGHT = 0xFF0E0E0E.toInt()
 
         fun show(ctx: Context, mode: String) = ctx.startActivity(
             Intent(ctx, FaceActivity::class.java).putExtra(EXTRA_MODE, mode).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP))

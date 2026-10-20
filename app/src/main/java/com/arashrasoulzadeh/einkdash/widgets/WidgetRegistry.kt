@@ -13,6 +13,9 @@ object WidgetRegistry {
         ControlsWidget(),
         CalendarWidget(),
         QuoteWidget(),
+        HabitsWidget(),
+        ShortcutsWidget(),
+        MottoWidget(),
     )
 
     private val byType = all.associateBy { it.type }

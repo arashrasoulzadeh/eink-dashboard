@@ -36,11 +36,32 @@ object Pomodoro {
     /** Length of the running session in minutes (quick starts can differ from the configured length). */
     fun sessionMin(ctx: Context) = prefs(ctx).getInt("sessionMin", workMin(ctx))
 
-    fun start(ctx: Context, phase: String, minutesOverride: Int = 0) {
-        val minutes = if (minutesOverride > 0) minutesOverride else if (phase == WORK) workMin(ctx) else breakMin(ctx)
-        val end = System.currentTimeMillis() + minutes * 60_000L
-        prefs(ctx).edit().putLong("endAt", end).putString("phase", phase).putInt("sessionMin", minutes).apply()
-        if (phase == WORK) {
+    /** Milliseconds left on a paused session, or 0. */
+    fun pausedLeft(ctx: Context) = prefs(ctx).getLong("pausedLeft", 0)
+
+    fun pause(ctx: Context) {
+        val left = endAt(ctx) - System.currentTimeMillis()
+        if (left <= 0) return
+        stop(ctx)
+        prefs(ctx).edit().putLong("pausedLeft", left).apply()
+    }
+
+    fun resume(ctx: Context) {
+        val left = pausedLeft(ctx)
+        if (left > 0) start(ctx, phase(ctx), resumeMs = left)
+    }
+
+    /** Back to idle, forgetting a paused session. */
+    fun reset(ctx: Context) {
+        stop(ctx)
+        prefs(ctx).edit().putLong("pausedLeft", 0).apply()
+    }
+
+    fun start(ctx: Context, phase: String, minutesOverride: Int = 0, resumeMs: Long = 0) {
+        val minutes = if (minutesOverride > 0) minutesOverride else if (resumeMs > 0) sessionMin(ctx) else if (phase == WORK) workMin(ctx) else breakMin(ctx)
+        val end = System.currentTimeMillis() + if (resumeMs > 0) resumeMs else minutes * 60_000L
+        prefs(ctx).edit().putLong("endAt", end).putString("phase", phase).putInt("sessionMin", minutes).putLong("pausedLeft", 0).apply()
+        if (phase == WORK && resumeMs == 0L) {
             setDndOn(ctx, true)
             if (openReader(ctx)) com.arashrasoulzadeh.einkdash.widgets.ReadingWidget.launchReader(ctx)
         }

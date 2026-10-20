@@ -162,4 +162,19 @@
     <string name="off_title">Device is off</string>
     <string name="off_since">Turned off at %1$s</string>
     <string name="off_hint">Hold the power button to turn it on.</string>
+    <string name="widget_habits">Today\'s habits</string>
+    <string name="habits_hint">One habit per line (up to 5)</string>
+    <string name="habits_edit">Habits</string>
+    <string name="widget_shortcuts">Shortcuts</string>
+    <string name="sc_library">Library</string>
+    <string name="sc_timer">Timer</string>
+    <string name="widget_motto">Motto</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_profile">Profile</string>
+    <string name="apps_search">Search apps</string>
+    <string name="pomo_time_left">time left</string>
+    <string name="sleep_well">Sleep well</string>
+    <string-array name="default_habits"><item>Reading</item><item>Exercise</item><item>Meditation</item><item>Writing</item></string-array>
+    <string-array name="mottos"><item>Every day,\na small step\ntoward better.</item><item>Calm is\nthe start of\nevery success.</item><item>One page\nat a time.</item><item>Slow and steady\nstill arrives.</item><item>Begin where\nyou are.</item><item>Less, but\nbetter.</item><item>Rest is part\nof the work.</item></string-array>
+    <string name="sc_habits">Habits</string>
 </resources>

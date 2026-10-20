@@ -24,7 +24,7 @@ interface WidgetHost {
  * Base view for widgets: a small uppercase section label, then content.
  * The home screen calls [refresh] on its ticker and then does one full e-ink refresh.
  */
-abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(context) {
+abstract class WidgetView(context: Context, titleRes: Int, icon: com.arashrasoulzadeh.einkdash.util.Icon.Kind? = null) : LinearLayout(context) {
 
     protected val dp = resources.displayMetrics.density
     protected val title: TextView = Ui.label(context, titleRes.takeIf { it != 0 } ?: R.string.empty)
@@ -34,6 +34,7 @@ abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(contex
 
     /** Header expand icon; hidden when the widget is already full screen. */
     val expand = ExpandIcon(context).apply {
+        alpha = 0.7f
         setOnClickListener {
             type?.let { t -> context.startActivity(Intent(context, FullscreenActivity::class.java).putExtra(FullscreenActivity.EXTRA_TYPE, t)) }
         }
@@ -41,18 +42,19 @@ abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(contex
 
     init {
         orientation = VERTICAL
-        val pad = (12 * dp).toInt()
-        setPadding(pad, (6 * dp).toInt(), (6 * dp).toInt(), pad)
-        val icon = (44 * dp).toInt()
+        val pad = (14 * dp).toInt()
+        setPadding(pad, (8 * dp).toInt(), (8 * dp).toInt(), pad)
+        val tap = (40 * dp).toInt()
         addView(LinearLayout(context).apply {
             gravity = Gravity.CENTER_VERTICAL
             // The header is its own touch target: a tap near ⛶ or the title never reaches the widget
             // (which, for the pomodoro, would start or stop the timer).
             isClickable = true
+            if (icon != null) addView(com.arashrasoulzadeh.einkdash.util.Icon(context, icon), LayoutParams((20 * dp).toInt(), (20 * dp).toInt()).apply { marginEnd = (8 * dp).toInt() })
             addView(title, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
-            addView(expand, LayoutParams(icon, icon))
+            addView(expand, LayoutParams(tap, tap))
         })
-        addView(Ui.gap(context, 2f))
+        addView(Ui.gap(context, 4f))
     }
 
     protected fun line(sizeSp: Float, face: Typeface = Ui.regular, center: Boolean = false): TextView =
@@ -76,7 +78,7 @@ abstract class WidgetView(context: Context, titleRes: Int) : LinearLayout(contex
 
     protected fun label(textRes: Int, extra: String? = null) {
         val base = context.getString(textRes)
-        title.text = (if (extra.isNullOrEmpty()) base else base + Fa.sep(context) + extra).uppercase(resources.configuration.locale)
+        title.text = if (extra.isNullOrEmpty()) base else base + Fa.sep(context) + extra
     }
 
     abstract fun refresh()
